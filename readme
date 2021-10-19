@@ -1,0 +1,40 @@
+TODO
+==================================================
+
+Juice
+--------------------------------------------------
+Add additional mapgen animations
+    randomly pick tween in:
+        spiral (done)
+        by q or r coords
+        completely random
+
+Architecture
+--------------------------------------------------
+fix up "init" in Sprite classes, either superclass to take repetition in constructor
+out or have singleton resource manager do the setCenterRatio calls.
+
+have dedicated messaging queue \ listeners on objects instead of just having scenes 
+do it. Have listener class, component of others, to generalise. Message queue is 
+singleton, polled in update.
+
+Have GameObject class, just for propagating update().
+    think carefully about any other functionality, heaps covers node stuff pretty 
+    well already
+        can we just make an Abstract on Heaps' Abstract class instead?
+
+Have singleton Rand so we have control seeds
+
+Make actual 2d beziers
+
+Gameplay Ideas
+--------------------------------------------------
+Have multiple islands. Have 1-1 connections between "close islands" via ports. Travel time 
+is one turn, transported units are then recruitable. Ports can recruit as Capitols but only
+from the pool of "transported" units. Transported units costs upkeep as usual. A waiting unit
+at a Port can be sent back to the other port.
+    AI considerations on not having too many in port important. Don't want too much eco drain
+
+Engineer unit to create\destroy forts. Cannon unit for ranged attacks
+    Units in fort do one better than normal. Win instead of draw, draw instead of lose.
+    Cannons disable forts for a turn, stun unit inside. Stunned units do not get fort bonus.

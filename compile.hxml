@@ -1,0 +1,9 @@
+-cp src
+-cp src/Gamelogic
+-cp src/Graphics
+-cp src/Utilities
+-lib heaps
+-lib libnoise
+-js hexstrat.js
+-main Main
+-debug
