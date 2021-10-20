@@ -12,7 +12,7 @@ class GameState {
 	public var hexOwners:HashMap<Hex, Int>;
 
     public function new() {
-        world = new World(100);
+        world = new World(50);
         world.generateWorld();
         hexOwners = new HashMap<Hex, Int>();
         for (h in world.hexes)
@@ -20,8 +20,8 @@ class GameState {
         units = new Array<Unit>();
         var owner_id = 0;
         for (h in world.placeTowns()) {
-            units.push(new Unit(UnitType.Knight, owner_id, owner_id, h));
-            units.push(new Unit(UnitType.Town, owner_id, owner_id, h));
+            units.push(new Unit(UnitType.Town, owner_id, h));
+            units.push(new Unit(UnitType.Knight, owner_id, h));
             owner_id = (owner_id+1)%7;
         }
     }

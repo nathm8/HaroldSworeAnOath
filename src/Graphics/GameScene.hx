@@ -5,17 +5,21 @@ import hxd.Key;
 import h2d.Scene;
 
 final tweenManager = TweenManager.singleton;
+final uiManager = UIManager.singleton;
 
 class GameScene extends Scene{
 
 	var gameState: GameState;
 	var sprites: Array<UnitSprite>;
 	var hexToSprites: HashMap<Hex, HexSprite>;
+	public var hexToUnitSprites: HashMap<Hex, Array<UnitSprite>>;
 	
     public function new() {
 		super();
 		sprites = new Array<UnitSprite>();
 		hexToSprites = new HashMap<Hex, HexSprite>();
+		hexToUnitSprites = new HashMap<Hex, Array<UnitSprite>>();
+		uiManager.gameScene = this;
     }
 	
 	// animate a new game by laying down the hexes in a pattern
@@ -47,7 +51,7 @@ class GameScene extends Scene{
 		for (h in gameState.world.hexes) {
 			var hs = new HexSprite(h, this);
 			hexToSprites[h] = hs;
-			hs.visible = false;
+			hexToUnitSprites[h] = new Array<UnitSprite>();
 			tweenManager.add(new ScaleBounceTween(hs, -i/gameState.hexes.length, 0.5));
 			i += 1;
 		}
@@ -60,6 +64,7 @@ class GameScene extends Scene{
 		for (unit in gameState.units) {
 			var s = new UnitSprite(unit, this);
 			sprites.push(s);
+			hexToUnitSprites[unit.position].push(s);
 			tweenManager.add(new ScaleLinearTween(s, 0, 0.5));
 		}
 	}
@@ -87,7 +92,5 @@ class GameScene extends Scene{
 			camera.scale(1.1, 1.1);
 		if (Key.isDown(Key.E))
 			camera.scale(0.9, 0.9);
-		for (sprite in sprites)
-			sprite.update(dt);
 	}
 }

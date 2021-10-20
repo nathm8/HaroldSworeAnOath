@@ -5,10 +5,12 @@ class Set<T:{function hashCode():Int;}> {
     public var length(get, null): Int;
 	public function new(?items: Iterable<T>) {
 		map = new HashMap<T, Bool>();
+        length = 0;
         if (items != null)
-            for (i in items)
+            for (i in items) {
                 map.set(i, true);
-		length = 0;
+                length += 1;
+            }
 	}
 
     public function add(a: T){

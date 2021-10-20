@@ -6,7 +6,7 @@ import h2d.Bitmap;
 
 class UnitSprite extends Bitmap {
     
-    var unit: Unit;
+    public var unit: Unit;
     static var init = false;
     static var unitTypeToTiles = new Map<UnitType, Tile>();
 
@@ -16,7 +16,8 @@ class UnitSprite extends Bitmap {
         unit = u;
 		super(unitTypeToTiles[unit.type], parent);
         color = COLOURS[unit.owner];
-        update(0);
+        x = unit.position.toPixel().x;
+        y = unit.position.toPixel().y;
     }
 
     function initialise() {
@@ -28,10 +29,5 @@ class UnitSprite extends Bitmap {
 		for (_ => tile in unitTypeToTiles){
             tile.setCenterRatio();
         }
-    }
-
-    public function update(dt: Float) {
-        x = unit.position.toPixel().x;
-        y = unit.position.toPixel().y;
     }
 }

@@ -1,7 +1,6 @@
 import haxe.ds.HashMap;
 import polygonal.ds.PriorityQueue;
 
-
 class Item<T> implements polygonal.ds.Prioritizable {
     public var payload: T;
 	public var priority(default, null):Float;

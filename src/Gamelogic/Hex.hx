@@ -1,3 +1,5 @@
+import h2d.col.Point;
+
 final pointyLayout = {
 	orientation: {
 		f0: Math.sqrt(3.0),
@@ -118,7 +120,7 @@ class Hex{
 		return this.add(Hex.direction(direction));
 	}
 
-	public function toPixel(layout=null) {
+	public function toPixel(layout=null):{x:Float, y:Float} {
 		if (layout == null)
 			layout = pointyLayout;
 		var M = layout.orientation;
@@ -128,34 +130,25 @@ class Hex{
 		var y = (M.f2 * this.q + M.f3 * this.r) * size.y;
 		return {x: x + origin.x, y: y + origin.y};
 	}
+
+	public function cornerOffset(layout = null, corner: Int) {
+		if (layout == null)
+			layout = pointyLayout;
+		var size = layout.size;
+		var angle = 2.0 * Math.PI * (layout.orientation.startAngle + corner)/6;
+		return {x: size.x * Math.cos(angle), y: size.y*Math.sin(angle)};
+	}
+
+	public function polygonCorners(layout=null):Array<Point> {
+		if (layout == null)
+			layout = pointyLayout;
+		var corners:Array<Point> = [];
+		var center = toPixel(layout);
+		for (i in 0...6) {
+			var offset = cornerOffset(layout, i);
+			corners.push(new Point(offset.x, offset.y));
+			// corners.push(new Point(center.x + offset.x, center.y + offset.y));
+		}
+		return corners;
+	}
 }
-
-// @:forward(q, r, s)
-// abstract Hex(HexBase) {
-    
-// 	public function new(q, r, s) {
-// 		this.q = q;
-// 		this.r = r;
-// 		this.s = s;
-// 	}
-
-//     public function toString() : String {
-// 		return "Hex(" + this.q + ", " + this.r + ", " + this.s+")";
-//     }
-
-//     @:op(A == B) public function equals(other:Hex) : Bool {
-// 		return this.q == other.q && this.r == other.r && this.s == other.s;
-//     }
-
-//     @:op(A + B) public function add(rhs:Hex) : Hex {
-// 		return new Hex(this.q + rhs.q, this.r + rhs.r, this.s + rhs.s);
-//     }
-
-// 	@:op(A - B) public function subtract(rhs:Hex) : Hex {
-// 		return new Hex(this.q - rhs.q, this.r - rhs.r, this.s - rhs.s);
-// 	}
-
-// 	@:op(A * B) public function scale(rhs:Int) : Hex {
-// 		return new Hex(this.q * rhs, this.r * rhs, this.s * rhs);
-// 	}
-// }

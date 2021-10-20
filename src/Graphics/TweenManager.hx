@@ -25,11 +25,12 @@ class ScaleBounceTween extends Tween {
 	public function new(d:Drawable, te:Float, tt:Float) {
         super(te, tt);
 		drawable = d;
+		d.visible = false;
 	}
 
 	override function update(dt:Float) {
         super.update(dt);
-		// negative te acts a delay
+		// negative te acts as a delay
 		if (timeElapsed < 0)
 			return;
 		drawable.visible = true;
@@ -57,7 +58,6 @@ class ScaleLinearTween extends Tween {
 		// negative te acts a delay
 		if (timeElapsed < 0)
 			return;
-		drawable.visible = true;
 		var t = timeElapsed / timeTotal;
 		drawable.setScale(t);
         if (t >= 1)
@@ -89,6 +89,28 @@ class ColourTween extends Tween {
 								   targetColour.z * t + originalColour.z * (1 - t),
 								   targetColour.w * t + originalColour.w * (1 - t));
 		drawable.color = d_col;
+	}
+}
+
+class RaiseTween extends Tween {
+	var drawable:Drawable;
+	var originalY:Float;
+	var targetY:Float;
+
+	public function new(d:Drawable, orig:Float, targ:Float, te:Float, tt:Float) {
+		super(te, tt);
+		drawable = d;
+		originalY = orig;
+		targetY = targ;
+	}
+
+	override function update(dt:Float) {
+		super.update(dt);
+		// negative te acts a delay
+		if (timeElapsed < 0)
+			return;
+		var t = Math.pow(timeElapsed / timeTotal, 2);
+		drawable.y = t*targetY + (1-t)*originalY;
 	}
 }
 
