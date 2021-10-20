@@ -109,8 +109,41 @@ class RaiseTween extends Tween {
 		// negative te acts a delay
 		if (timeElapsed < 0)
 			return;
-		var t = Math.pow(timeElapsed / timeTotal, 2);
+		var t = Math.pow(timeElapsed / timeTotal, 6);
 		drawable.y = t*targetY + (1-t)*originalY;
+	}
+}
+
+class MoveBounceTween extends Tween {
+	var drawable:Drawable;
+	var x = [0, -0.5, 1.5, 1];
+	var original:{x:Float, y:Float};
+	var target:{x:Float, y:Float};
+
+	public function new(d:Drawable, orig:{x:Float, y:Float},  targ: {x:Float, y:Float}, te:Float, tt:Float) {
+		super(te, tt);
+		drawable = d;
+		original = orig;
+		target = targ;
+	}
+
+	override function update(dt:Float) {
+		super.update(dt);
+		// negative te acts as a delay
+		if (timeElapsed < 0)
+			return;
+		var t = timeElapsed / timeTotal;
+		var bx: Float;
+		if (t > 0.5) {
+			var tt = timeElapsed / (timeTotal * timeElapsed * .2);
+			t = tt > 1 ? 1 : tt;
+		}
+		var bx = Math.pow(1 - t, 3) * x[0]
+			+ 3 * Math.pow(1 - t, 2) * t * x[1]
+			+ 3 * (1 - t) * Math.pow(t, 2) * x[2]
+			+ Math.pow(t, 3) * x[3];
+		drawable.x = (1 - bx) * original.x + bx*target.x;
+		drawable.y = (1 - bx) * original.y + bx*target.y;
 	}
 }
 
@@ -152,6 +185,10 @@ class TweenManager {
 
     public function add(t: Tween) {
         tweens.push(t);
+    }
+
+    public function remove(t: Tween) {
+        tweens.remove(t);
     }
 
 }

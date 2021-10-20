@@ -1,5 +1,6 @@
+import GameScene.tweenManager;
+import TweenManager;
 import h2d.Bitmap;
-import TweenManager.RaiseTween;
 import Unit;
 import MessageManager;
 
@@ -11,6 +12,7 @@ class UIManager implements MessageListener {
 	public static final singleton = new UIManager();
     public var gameScene(null, set): GameScene;
     var selectedUnit: UnitSprite;
+    var selectedUnitGhost: UnitSprite;
     var selectedHex: Bitmap;
 
 	private function new() {
@@ -34,15 +36,20 @@ class UIManager implements MessageListener {
                 messageManager.sendMessage(new KnightMoveMessage(selectedUnit.unit.position, hex));
                 animateUnitMovement(hex);
                 selectedUnit = null;
+                selectedUnitGhost.remove();
+				selectedUnitGhost = null;
                 return true;
             }
         }
         if (Std.isOfType(msg, HexOverMessage)) {
 			var hex = cast(msg, HexOverMessage).hex;
-            trace(hex);
 			var p = hex.toPixel();
             selectedHex.x = p.x;
             selectedHex.y = p.y;
+			if (selectedUnit != null) {
+				selectedUnitGhost.x = p.x;
+				selectedUnitGhost.y = p.y-6;
+            }
         }
         return false;
 	}
@@ -57,9 +64,19 @@ class UIManager implements MessageListener {
 	}
 
 	function animateUnitSelection() {
-        trace(selectedUnit.y);
-		tweenManager.add(new RaiseTween(selectedUnit, selectedUnit.y, selectedUnit.y-6, 0, 0.5));
-    }
+		selectedUnitGhost = new UnitSprite(selectedUnit.unit, selectedUnit.parent);
+		var col = selectedUnitGhost.color.clone();
+		col.w = 0.5;
+        selectedUnitGhost.color = col;
+        selectedUnitGhost.y -= 6;
 
-	function animateUnitMovement(hex:Hex) {}
+		tweenManager.add(new RaiseTween(selectedUnit, selectedUnit.y, selectedUnit.y - 6, 0, 0.5));
+    }
+    
+	function animateUnitMovement(hex:Hex) {
+        var orig = {x: selectedUnit.x, y: selectedUnit.y};
+		var p = hex.toPixel();
+        var targ = {x: p.x, y: p.y};
+		tweenManager.add(new MoveBounceTween(selectedUnit, orig, targ, 0, .75));
+    }
 }

@@ -12,7 +12,8 @@ final pointyLayout = {
 		b3: 2.0 / 3.0,
 		startAngle: 0.5
 	},
-	size: {x: 11.5, y: 10.6},
+	// size: {x: 11.5, y: 10.6},
+	size: {x: 12.5, y: 12},
 	origin: {x: 500, y: 500}
 }
 
