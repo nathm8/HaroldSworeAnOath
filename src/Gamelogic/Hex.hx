@@ -39,7 +39,9 @@ class Hex{
 	}
 
 	public function hashCode():Int {
-		return Math.round(q+100*s+10000*r);
+		var hq = Math.round(q);
+		var hr = Math.round(r);
+		return hq ^ (hr + 0x9e3779b9 + (hq << 6) + (hq >> 2));
 	}
 
 	@:op(A == B) 

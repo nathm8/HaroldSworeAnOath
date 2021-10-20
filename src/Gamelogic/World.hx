@@ -2,30 +2,15 @@ import hxd.Rand;
 import haxe.ds.HashMap;
 import Set;
 
-final 
-
-class UnitPositionPlayer {
-	public var position:Hex;
-	public var player:Int;
-	public var distance:Int;
-	public function new(position:Hex, player:Int, distance:Int) {
-		this.position = position;
-		this.player = player;
-		this.distance = distance;
-	}
-}
-
 class World{
 	public var hexes:  Array<Hex>;
 	var hexSet:        Set<Hex>;
 	var size:          Int;
-	var numberPlayers: Int;
-	var pathfinder:    Astar;
+	public var pathfinder(default, null):    Astar;
 	var maxD:          Int;
     
-    public function new(size: Int, num_players: Int) {
+    public function new(size: Int) {
         this.size = size;
-        numberPlayers = num_players;
         hexes = [];
     }
 
@@ -75,8 +60,7 @@ class World{
 
             // base case: add current hex to subgraph, recurse to neighbours
             subgraph.push(h);
-			for (n in h.ring(1))
-            {
+			for (n in h.ring(1)) {
                 // trace("recursing to neighbours");
                 subgraph = bfs(n, subgraph);
             }
@@ -143,24 +127,21 @@ class World{
             return;
         }
         var f: (Hex, Hex) -> Int;
-        if (q) {
+        if (q) 
             if (reversed)
                 f = (a, b) -> Math.round(b.q - a.q);
             else
                 f = (a, b) -> Math.round(a.q - b.q);
-        }
-        else if (r) {
+        else if (r) 
             if (reversed)
                 f = (a, b) -> Math.round(b.r - a.r);
             else
                 f = (a, b) -> Math.round(a.r - b.r);
-        }
-        else {
+        else 
             if (reversed)
                 f = (a, b) -> Math.round(b.s - a.s);
             else
                 f = (a, b) -> Math.round(a.s - b.s);
-        }
 		hexes.sort(f);
 	}
 
@@ -170,101 +151,57 @@ class World{
 		r.shuffle(hexes);
 	}
 
-    // generate starting locations, returning empty array if we fail 1000
-    // times. Should consider world invalid and regen.
-    public function placeCapitols(): Array<Hex> {
-        var min_dist = Math.max(8, size / numberPlayers);
+    // put down N towns
+    public function placeTowns(): Array<Hex> {
+        var town_locations = new Array<Hex>();
 
+        var available_world = new Set<Hex>();
         // all non-coastal locations are valid starting locations
-        var available_world: Array<Hex> = [];
         for (h in hexes) {
             var no_water_neighbour = true;
-            for (n in h.ring(1))
-                if (!hexSet.exists(n)) {
-					no_water_neighbour = false;
-                    break;
-                } 
-            if (no_water_neighbour) available_world.push(h);
+        for (n in h.ring(1))
+            if (!hexSet.exists(n)) {
+                no_water_neighbour = false;
+                break;
+            } 
+            if (no_water_neighbour) available_world.add(h);
+        }
+		while (town_locations.length < 30 && available_world.length > 0) {
+            var available_array = available_world.toArray();
+			var i = Rand.create().random(available_array.length);
+            var h = available_array[i];
+            town_locations.push(h);
+            for (n in h.spiral(2))
+                available_world.remove(n);
         }
 
-        var available_world_original = available_world;
-
-        var taken_positions: Array<Hex> = [];
-        var attempts = 0;
-
-        while (taken_positions.length != numberPlayers) {
-            // look for a spot
-			var i = Rand.create().random(available_world.length);
-            // trace(i);
-            var pos = available_world[i];
-            // trace(pos);
-            taken_positions.push(pos);
-            var available_world_tmp = [];
-            for (h in available_world) {
-                var dist = pathfinder.findPath(pos, h).length;
-                trace(dist);
-                if (dist > min_dist) available_world_tmp.push(h);
-            }
-            available_world = available_world_tmp;
-            // if we can't place all players try again from the top, with a limit of the number of times we attempt
-            if (available_world.length < numberPlayers - i) {
-                // trace(i);
-                // trace(taken_positions);
-                i = 0;
-                // trace(i);
-                taken_positions = [];
-                available_world = available_world_original;
-                attempts++;
-                if (attempts == 1000) {
-                    trace('Failure to place capitols');
-                    return [];
-                }
-            }
-        }
-
-        var player_starting_positions: Array<Hex> = [];
-        for (i in 0...numberPlayers) player_starting_positions.push(taken_positions[i]);
-        return player_starting_positions;
+        return town_locations;
     }
 
     // returns:
     //          map of Hex to int, the owning player's index. With -1 for neutral hexes
     //          map of the closest unit to each owned hex, for animation purposes
-    public function determineTerritories(units_per_player: HashMap<Hex, Unit>): {owner: HashMap<Hex, Int>, closest: HashMap<Hex, Hex>} {
-        
-        var territories = new HashMap<Hex, Int>();
-        var closest_units = new HashMap<Hex, Hex>();
+    public function determineTerritories(units: Array<Unit>): HashMap<Hex, {owner: Int, dist: Int}> {
+        // trace("determineTerritories : start");
+		var territories = new HashMap<Hex, {owner:Int, dist:Int}>();
         for (h in hexes) {
-            var bh: PriorityQueue<UnitPositionPlayer> = new PriorityQueue();
-            for (unit_position => unit in units_per_player) {
-                var d = pathfinder.findPath(h, unit_position).length;
-                bh.push(new UnitPositionPlayer(unit_position, unit.owner, d), d);
+            // neutral hex
+			territories[h] = {owner: -1, dist: -1};
+			var unit_queue = new PriorityQueue<{owner:Int, dist:Int}>(true);
+            for (unit in units) {
+                var d = pathfinder.findPath(h, unit.position).length;
+                unit_queue.push({owner: unit.owner, dist: d}, d);
             }
-            var min_dist_player = -1;
-
-            var closest: UnitPositionPlayer = bh.pop();
-            var second_closest = bh.pop();
-            if (closest == null) {
-                trace(false);
-                trace(units_per_player);
-            }
-            if (second_closest == null) {
-                trace(false);
-                trace(units_per_player);
-            }
-            var only_one_closest_single_player = true;
-            // if the two closest units are equidistant and not on the same side then the hex is neutral
-            while (closest.distance == second_closest.distance && only_one_closest_single_player) {
-                only_one_closest_single_player = closest.player == second_closest.player;
-                if (bh.size() == 0) break;
-                second_closest = bh.pop();
-            }
-            if (only_one_closest_single_player) min_dist_player = closest.player;
-
-            closest_units.set(h, closest.position); // doesn't matter if it's a neutral hex or not here, since it's just for graphics
-            territories.set(h, min_dist_player);
+            var closest = unit_queue.pop();
+            var next_closest = unit_queue.pop();
+            // find all closest units. If two equidistant units have different owners the 
+            // hex remains neutral, otherwise falls under the closest unit owner's control
+			while (unit_queue.size() > 0 && closest.dist == next_closest.dist && closest.owner == next_closest.owner)
+                next_closest = unit_queue.pop();
+            if (closest.dist < next_closest.dist || closest.owner == next_closest.owner)
+				territories[h] = closest;
         }
 
-        return {owner: territories, closest: closest_units};
+		return territories;
     }
 }

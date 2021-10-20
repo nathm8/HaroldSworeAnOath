@@ -1,3 +1,4 @@
+import PriorityQueue;
 import haxe.ds.HashMap;
 
 function reconstructPath(from:HashMap<Hex, Hex>, node:Hex):Array<Hex> {
@@ -9,7 +10,7 @@ function reconstructPath(from:HashMap<Hex, Hex>, node:Hex):Array<Hex> {
 	return path;
 }
 
-function heuristic(start:Hex, end:Hex) {
+function heuristic(start:Hex, end:Hex) : Float {
 	return start.distance(end);
 }
 
@@ -21,69 +22,31 @@ class Astar {
     }
 
 	public function findPath(start: Hex, goal: Hex, debug=false): Array<Hex> {
-		if (debug) {
-			trace('start', start);
-			trace('goal', goal);
-		}
-		if (!this.hexSet.exists(goal)) {
-			if (debug)
-				trace('goal hex not in world');
-			return [];
-		}
-		
-		var open = new Set<Hex>();
-		open.add(start);
-		
-		var closed = new Set<Hex>();
-		
+		if (debug) trace("findPath start");
+		var frontier = new RePriorityQueue<Hex>(true);
+		frontier.push(start, 0);
 		var from = new HashMap<Hex, Hex>();
-		
-		var gScore = new HashMap<Hex, Int>();
-		gScore.set(start, 0);
-		
-		var frontier = new PriorityQueue<Hex>();
-		frontier.push(start, heuristic(start, goal));
-		while (open.length > 0) {
-			
+		var costs = new HashMap<Hex, Float>();
+		costs[start] = 0;
+
+		while (frontier.size() > 0) {
 			var current = frontier.pop();
-			if (debug) {
-				trace('current', current);
-				trace('closed', closed);
+			if (current.equals(goal)) {
+				if (debug) trace("path found");
+				return reconstructPath(from, current);
 			}
-			if (current == goal) {
-				
-				var path = reconstructPath(from, current);
-				return path;
-			}
-			open.remove(current);
-			closed.add(current);
-			for (h in current.ring(1)) {
-				if (debug)
-					trace(h);
-				if (!this.hexSet.exists(h)) {
-					if (debug)
-						trace('neighbour not in world, discarding');
-					return [];
+			for (n in current.ring(1)) {
+				if (! hexSet.exists(n)) continue;
+				var new_cost = costs[current] + 1;
+				if (!costs.exists(n) || new_cost < costs[n]) {
+					costs[n] = new_cost;
+					from[n] = current;
+					frontier.pushOrReprioritise(n, new_cost + heuristic(n, goal));
 				}
-				if (closed.exists(h)) {
-					if (debug)
-						trace('neighbour in closed, discarding');
-					return [];
-				}
-				
-				var g_tmp = gScore.get(current) + 1;
-				if (!open.exists(h))
-					open.add(h);
-				else if (gScore.exists(h) && g_tmp >= gScore.get(h))
-					return [];
-				from.set(h, current);
-				gScore.set(h, g_tmp);
-				frontier.push(h, g_tmp + heuristic(h, goal));
 			}
 		}
-		// exhausted open without finding a path
-		if (debug)
-			trace('exhausted open without finding a path');
+
+		if (debug) trace("failed to find path");
 		return [];
 	}
 }

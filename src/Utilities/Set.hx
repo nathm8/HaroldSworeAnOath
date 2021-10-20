@@ -17,7 +17,7 @@ class Set<T:{function hashCode():Int;}> {
         map.set(a, true);
     }
     
-	public function remove(a:T) {
+	public function remove(a: T) {
         if (!map.exists(a)) return;
         length--;
         map.remove(a);
@@ -30,4 +30,11 @@ class Set<T:{function hashCode():Int;}> {
 	public function get_length() : Int {
 		return length;
     }
+
+	public function toArray(): Array<T> {
+        var ret = new Array<T>();
+        for (k => _ in map)
+            ret.push(k);
+		return ret;
+	}
 }

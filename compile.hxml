@@ -4,6 +4,7 @@
 -cp src/Utilities
 -lib heaps
 -lib libnoise
+-lib polygonal-ds
 -js hexstrat.js
 -main Main
 -debug
