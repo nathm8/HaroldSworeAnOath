@@ -1,3 +1,5 @@
+import h2d.Object;
+import js.html.DragEvent;
 import hxd.Rand;
 import h2d.Drawable;
 
@@ -174,6 +176,25 @@ class GlowInfiniteTween extends Tween {
 			reverse = !reverse;
 		var t = timeElapsed / timeTotal;
 		drawable.alpha = t;
+	}
+}
+
+class FadeOutTween extends Tween {
+	var obj:Object;
+
+	public function new(o:Object, te:Float, tt:Float) {
+		super(te, tt);
+		obj = o;
+	}
+
+	override function update(dt:Float) {
+		super.update(dt);
+		var t = timeElapsed / timeTotal;
+		if (t < 0.5)
+			t = 0;
+		obj.alpha = 1-t;
+		if (t == 1)
+			obj.remove();
 	}
 }
 

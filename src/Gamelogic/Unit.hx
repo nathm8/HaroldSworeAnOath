@@ -6,21 +6,16 @@ enum UnitType {
 class Unit {
     public var type: UnitType;
 	public var owner: Int;
-	public var liege: Int;
+	public var home: Unit;
 	public var canMove: Bool;
     public var position: Hex;
-    static var nextId=0;
-    var id: Int;
 
-	public function new(type:UnitType, owner:Int, position: Hex, canMove = true) {
+	public function new(type:UnitType, owner:Int, position: Hex, home=null, canMove = true) {
         this.type = type;
         this.owner = owner;
         this.canMove = canMove;
         this.position = position;
-        id = nextId++;
+        this.home = home;
     }
 
-    public function hashCode(): Int {
-        return id;
-    }
 }

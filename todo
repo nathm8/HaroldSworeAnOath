@@ -1,9 +1,4 @@
-Win by gaining fealty from all Castles
-Gain fealty by spending Divine Right or by Storm
-Gather Divine Right by owning Land
-Conquer Land and Castles with Knights
-Move into enemy Knights to knock them back
-Knights in Castles cannot be knocked back
+Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or by Storm\nGather Divine Right by owning Land\nConquer Land and Castles with Knights\nMove into enemy Knights to knock them back\nKnights in Castles cannot be knocked back
 
 ======================================================
                         TODO
@@ -13,18 +8,21 @@ Knights in Castles cannot be knocked back
 Map seeds not determining everything about the map, need to find where
 other random calls are creeping in. Noticed maps changed at midnight
 
+make sure player is assigned a colour which spawns
+
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
+- buy town logic
 - turns
-- current turn\current income\DR GUI
-- finish movement logic\restrictions
-- knockback logic
-- determine town prices at mapgen
-- buy town logic\GUI
-- gameover sequence
+- AI
+
 - main menu sequence
-- 
+- gameover sequence
+- GUI
+    - tween in the GUI
+    - tween up\down the numbers
+    - have crowns shoot at purchased town
 
 ------------------------------------------------------
                         AI

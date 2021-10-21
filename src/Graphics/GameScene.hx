@@ -13,19 +13,19 @@ class GameScene extends Scene implements MessageListener {
 
 	public var gameState: GameState;
 	var hexToHexSprites: HashMap<Hex, HexSprite>;
-	public var unitToUnitSprites:HashMap<Unit, UnitSprite>;
+	public var unitToUnitSprites:Map<Unit, UnitSprite>;
 	
-    public function new() {
+	public function new(gs:GameState) {
 		super();
+		gameState = gs;
 		hexToHexSprites = new HashMap<Hex, HexSprite>();
-		unitToUnitSprites = new HashMap<Unit, UnitSprite>();
-		uiManager.gameScene = this;
+		unitToUnitSprites = new Map<Unit, UnitSprite>();
+		uiManager.initialiseWithGameScene(this);
 		messageManager.addListener(this);
     }
 	
 	// animate a new game by laying down the hexes in a pattern
-    public function newGame(gs: GameState) {
-		gameState = gs;
+    public function newGame() {
 		camera.setPosition(250, 250);
 		camera.setScale(2, 2);
 		
@@ -56,7 +56,7 @@ class GameScene extends Scene implements MessageListener {
 			i += 1;
 		}
 		tweenManager.add(new DelayedCallTween(drawTowns, -i/gameState.hexes.length-0.5, 0));
-		tweenManager.add(new DelayedCallTween(colourTerritories, -i/gameState.hexes.length-0.5, 0));
+		tweenManager.add(new DelayedCallTween(colourTerritoriesFirstTurn, -i/gameState.hexes.length-0.5, 0));
 		ysort(0);
     }
 	
@@ -68,23 +68,32 @@ class GameScene extends Scene implements MessageListener {
 		}
 	}
 
-	public function colourTerritories() {
-		var territories = gameState.world.determineTerritories(gameState.units);
+	public function colourTerritoriesFirstTurn() {
+		colourTerritories(true);
+	}
+
+	public function colourTerritories(firstTurn=false) {
+		var territories = gameState.determineTerritories();
 		for (h in gameState.hexes) {
 			hexToHexSprites[h].capturedBy(territories[h].owner, territories[h].dist);
+		}
+		gameState.updateIncome();
+		if (firstTurn) {
+			gameState.getIncome(0, firstTurn);
+			messageManager.sendMessage(new UpdateEconomyGUIMessage());
 		}
 	}
 
 	// control our camera
 	public function update(dt:Float) {
 		if (Key.isDown(Key.UP))
-			camera.move(0, -1000*dt);
+			camera.move(0, -100*dt);
 		if (Key.isDown(Key.DOWN))
-			camera.move(0, 1000*dt);
+			camera.move(0, 100*dt);
 		if (Key.isDown(Key.LEFT))
-			camera.move(-1000*dt, 0);
+			camera.move(-100*dt, 0);
 		if (Key.isDown(Key.RIGHT))
-			camera.move(1000*dt, 0);
+			camera.move(100*dt, 0);
 		if (Key.isDown(Key.Q))
 			camera.scale(1.1, 1.1);
 		if (Key.isDown(Key.E))
@@ -93,8 +102,8 @@ class GameScene extends Scene implements MessageListener {
 
 	public function receiveMessage(msg:Message):Bool {
 		if (Std.isOfType(msg, RecalculateTerritoriesMessage)) {
-			
 			colourTerritories();
+			messageManager.sendMessage(new UpdateEconomyGUIMessage());
 			return true;
 		}
 		return false;

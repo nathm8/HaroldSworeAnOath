@@ -42,6 +42,12 @@ class RecalculateTerritoriesMessage extends Message {
 	}
 }
 
+class UpdateEconomyGUIMessage extends Message {
+	public function new() {
+		name = "UpdateEconomyGUIMessage";
+	}
+}
+
 
 interface MessageListener {
     public function receiveMessage(msg: Message): Bool;

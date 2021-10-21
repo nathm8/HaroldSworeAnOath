@@ -1,3 +1,5 @@
+import h2d.Text;
+import h2d.Flow;
 import Constants;
 import TweenManager;
 import h2d.Bitmap;
@@ -9,11 +11,14 @@ final tweenManager = TweenManager.singleton;
 class UIManager implements MessageListener {
 
 	public static final singleton = new UIManager();
-    public var gameScene(null, set): GameScene;
+    var gameScene: GameScene;
     var selectedUnit: UnitSprite;
     var selectedUnitGhost: UnitSprite;
     var selectedHex: Bitmap;
     var movementHexes: Array<Bitmap>;
+    
+    // top row UI
+    var gui: GUI;
 
 	private function new() {
         messageManager.addListener(this);
@@ -31,7 +36,7 @@ class UIManager implements MessageListener {
             var hex = cast(msg, HexClickMessage).hex;
             if (selectedUnit == null) {
 				var unit = gameScene.gameState.hexToUnits[hex].knight;
-                if (unit != null && unit.canMove) {
+                if (unit != null && unit.canMove && unit.owner == gameScene.gameState.currentTurn) {
 					selectedUnit = gameScene.unitToUnitSprites[unit];
                     animateUnitSelection();
                     setMovementHexesPosition(hex);
@@ -59,12 +64,18 @@ class UIManager implements MessageListener {
                     selectedUnitGhost.x = p.x;
                     selectedUnitGhost.y = p.y-6;
                 }
+            } else {
+				var unit = gameScene.gameState.hexToUnits[hex].town;
+                if (unit != null && unit.owner != gameScene.gameState.currentTurn) {
+                    new CostIndicator(hex, gameScene, unit.owner);
+                }
             }
         }
         return false;
 	}
 
-	function set_gameScene(value:GameScene):GameScene {
+
+	public function initialiseWithGameScene(value:GameScene):GameScene {
 		gameScene = value;
 		var hexTile = hxd.Res.img.HexSelect.toTile();
 		hexTile.setCenterRatio();
@@ -81,6 +92,8 @@ class UIManager implements MessageListener {
             mh.visible = false;
             movementHexes.push(mh);
         }
+        gui = new GUI(gameScene);
+
 		return gameScene;
 	}
 

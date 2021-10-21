@@ -1,3 +1,5 @@
+import Constants;
+
 final tweenManager = TweenManager.singleton;
 final messageManager = MessageManager.singleton;
 final uiManager = UIManager.singleton;
@@ -32,9 +34,9 @@ class Main extends hxd.App {
 		tweenManager.reset();
 		messageManager.reset();
 		uiManager.reset();
-		gameScene = new GameScene();
 		gameState = new GameState();
-		gameScene.newGame(gameState);
+		gameScene = new GameScene(gameState);
+		gameScene.newGame();
 		this.setScene2D(gameScene);
 	}
 

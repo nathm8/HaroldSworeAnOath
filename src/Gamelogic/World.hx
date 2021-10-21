@@ -198,7 +198,7 @@ class World{
             var min_d = 100;
             var closest_units = [];
             var visited_hexes = new Set<Hex>();
-            for (u in units){
+            for (u in units) {
                 if (visited_hexes.exists(u.position)) continue;
 				visited_hexes.add(u.position);
                 if (u.position.equals(h)) {
