@@ -1,6 +1,6 @@
-import h2d.Bitmap;
-
 final tweenManager = TweenManager.singleton;
+final messageManager = MessageManager.singleton;
+final uiManager = UIManager.singleton;
 
 class Main extends hxd.App {
 
@@ -29,6 +29,9 @@ class Main extends hxd.App {
 	}
 	
 	function newGame() {
+		tweenManager.reset();
+		messageManager.reset();
+		uiManager.reset();
 		gameScene = new GameScene();
 		gameState = new GameState();
 		gameScene.newGame(gameState);

@@ -2,8 +2,8 @@ import hxd.Perlin;
 
 final seeds = [
 	483655,
-	172512,
-	308892,
+	331456,
+	313234,
 	381256,
 	413795,
 	448958];
@@ -11,9 +11,11 @@ final seeds = [
 class Noisemap {
 	var noisemap:Array<Array<Float>>;
 	var noise = new Perlin();
+	// var seed = Std.random(1000000);
 	var seed = seeds[Std.random(6)];
 	
 	public function new() {
+		// trace(seed);
 		noise.normalize = true;
 	}
 

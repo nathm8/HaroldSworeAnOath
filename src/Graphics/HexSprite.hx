@@ -40,6 +40,7 @@ class HexSprite extends Bitmap {
     }
 
 	public function capturedBy(new_owner_id: Int, d:Int) {
+        if (new_owner_id == owner) return;
 		var col = new_owner_id == -1 ? COLOURS[7] : COLOURS[new_owner_id];
         // color = col;
 		tweenManager.add(new ColourTween(this, color, col, -d*0.1, 0.5));

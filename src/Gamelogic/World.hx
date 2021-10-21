@@ -2,9 +2,19 @@ import hxd.Rand;
 import haxe.ds.HashMap;
 import Set;
 
+class OwnerDist {
+	public var dist:Int;
+	public var owner:Int;
+
+	public function new(o:Int, d:Int) {
+		dist = d;
+		owner = o;
+	}
+}
+
 class World{
 	public var hexes:  Array<Hex>;
-	var hexSet:        Set<Hex>;
+	public var hexSet(get, default): Set<Hex>;
 	var size:          Int;
 	public var pathfinder(default, null):    Astar;
 	var maxD:          Int;
@@ -181,27 +191,44 @@ class World{
     // returns:
     //          map of Hex to int, the owning player's index. With -1 for neutral hexes
     //          map of the closest unit to each owned hex, for animation purposes
-    public function determineTerritories(units: Array<Unit>): HashMap<Hex, {owner: Int, dist: Int}> {
+    public function determineTerritories(units: Array<Unit>): HashMap<Hex, OwnerDist> {
         // trace("determineTerritories : start");
-		var territories = new HashMap<Hex, {owner:Int, dist:Int}>();
+		var territories = new HashMap<Hex, OwnerDist>();
         for (h in hexes) {
-            // neutral hex
-			territories[h] = {owner: -1, dist: -1};
-			var unit_queue = new PriorityQueue<{owner:Int, dist:Int}>(true);
-            for (unit in units) {
-                var d = pathfinder.findPath(h, unit.position).length;
-                unit_queue.push({owner: unit.owner, dist: d}, d);
+            var min_d = 100;
+            var closest_units = [];
+            var visited_hexes = new Set<Hex>();
+            for (u in units){
+                if (visited_hexes.exists(u.position)) continue;
+				visited_hexes.add(u.position);
+                if (u.position.equals(h)) {
+					closest_units = [u];
+					min_d = 0;
+                    break;
+                }
+                // do quick check first, path length can only be longer than straight line
+                var d = h.distance(u.position);
+                if (d > min_d) continue;
+				var d = pathfinder.findPath(h, u.position).length;
+                if (d < min_d) {
+                    closest_units = [u];
+                    min_d = d;
+                } else if (d == min_d) {
+                    closest_units.push(u);
+                }
             }
-            var closest = unit_queue.pop();
-            var next_closest = unit_queue.pop();
-            // find all closest units. If two equidistant units have different owners the 
-            // hex remains neutral, otherwise falls under the closest unit owner's control
-			while (unit_queue.size() > 0 && closest.dist == next_closest.dist && closest.owner == next_closest.owner)
-                next_closest = unit_queue.pop();
-            if (closest.dist < next_closest.dist || closest.owner == next_closest.owner)
-				territories[h] = closest;
+            var same_owner = true;
+            var owner = closest_units[0].owner;
+            for (u in closest_units)
+                if (u.owner != owner)
+                    same_owner = false;
+            if (!same_owner) owner = -1;
+            territories[h] = new OwnerDist(owner, min_d);
         }
-
 		return territories;
     }
+
+	function get_hexSet():Set<Hex> {
+		return hexSet;
+	}
 }

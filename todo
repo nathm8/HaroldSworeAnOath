@@ -1,0 +1,35 @@
+Win by gaining fealty from all Castles
+Gain fealty by spending Divine Right or by Storm
+Gather Divine Right by owning Land
+Conquer Land and Castles with Knights
+Move into enemy Knights to knock them back
+Knights in Castles cannot be knocked back
+
+======================================================
+                        TODO
+======================================================
+                        Bugs
+------------------------------------------------------
+Map seeds not determining everything about the map, need to find where
+other random calls are creeping in. Noticed maps changed at midnight
+
+------------------------------------------------------
+                        Roadmap
+------------------------------------------------------
+- turns
+- current turn\current income\DR GUI
+- finish movement logic\restrictions
+- knockback logic
+- determine town prices at mapgen
+- buy town logic\GUI
+- gameover sequence
+- main menu sequence
+- 
+
+------------------------------------------------------
+                        AI
+------------------------------------------------------
+0) buy any town we can afford, most expensive first
+1) attack adjacent enemies
+2) move in direction that gets us the most territory, if none move towards
+   closest enemy knight

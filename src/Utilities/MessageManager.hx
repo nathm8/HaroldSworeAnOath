@@ -36,6 +36,13 @@ class KnightMoveMessage extends Message {
 	}
 }
 
+class RecalculateTerritoriesMessage extends Message {
+	public function new() {
+		name = "RecalculateTerritoriesMessage";
+	}
+}
+
+
 interface MessageListener {
     public function receiveMessage(msg: Message): Bool;
 }
@@ -57,5 +64,9 @@ class MessageManager {
         for (l in listeners)
             if (l.receiveMessage(msg)) return;
     }
+
+	public function reset() {
+		listeners = [];
+	}
 
 }

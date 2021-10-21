@@ -1,3 +1,5 @@
+import UIManager.messageManager;
+import MessageManager;
 import haxe.ds.HashMap;
 import TweenManager;
 import hxd.Rand;
@@ -7,19 +9,18 @@ import h2d.Scene;
 final tweenManager = TweenManager.singleton;
 final uiManager = UIManager.singleton;
 
-class GameScene extends Scene{
+class GameScene extends Scene implements MessageListener {
 
-	var gameState: GameState;
-	var sprites: Array<UnitSprite>;
-	var hexToSprites: HashMap<Hex, HexSprite>;
-	public var hexToUnitSprites: HashMap<Hex, Array<UnitSprite>>;
+	public var gameState: GameState;
+	var hexToHexSprites: HashMap<Hex, HexSprite>;
+	public var unitToUnitSprites:HashMap<Unit, UnitSprite>;
 	
     public function new() {
 		super();
-		sprites = new Array<UnitSprite>();
-		hexToSprites = new HashMap<Hex, HexSprite>();
-		hexToUnitSprites = new HashMap<Hex, Array<UnitSprite>>();
+		hexToHexSprites = new HashMap<Hex, HexSprite>();
+		unitToUnitSprites = new HashMap<Unit, UnitSprite>();
 		uiManager.gameScene = this;
+		messageManager.addListener(this);
     }
 	
 	// animate a new game by laying down the hexes in a pattern
@@ -50,8 +51,7 @@ class GameScene extends Scene{
 		}
 		for (h in gameState.world.hexes) {
 			var hs = new HexSprite(h, this);
-			hexToSprites[h] = hs;
-			hexToUnitSprites[h] = new Array<UnitSprite>();
+			hexToHexSprites[h] = hs;
 			tweenManager.add(new ScaleBounceTween(hs, -i/gameState.hexes.length, 0.5));
 			i += 1;
 		}
@@ -63,8 +63,7 @@ class GameScene extends Scene{
 	public function drawTowns() {
 		for (unit in gameState.units) {
 			var s = new UnitSprite(unit, this);
-			sprites.push(s);
-			hexToUnitSprites[unit.position].push(s);
+			unitToUnitSprites[unit] = s;
 			tweenManager.add(new ScaleLinearTween(s, 0, 0.5));
 		}
 	}
@@ -72,9 +71,7 @@ class GameScene extends Scene{
 	public function colourTerritories() {
 		var territories = gameState.world.determineTerritories(gameState.units);
 		for (h in gameState.hexes) {
-			if (territories[h].owner == gameState.hexOwners[h])
-				continue;
-			hexToSprites[h].capturedBy(territories[h].owner, territories[h].dist);
+			hexToHexSprites[h].capturedBy(territories[h].owner, territories[h].dist);
 		}
 	}
 
@@ -92,5 +89,14 @@ class GameScene extends Scene{
 			camera.scale(1.1, 1.1);
 		if (Key.isDown(Key.E))
 			camera.scale(0.9, 0.9);
+	}
+
+	public function receiveMessage(msg:Message):Bool {
+		if (Std.isOfType(msg, RecalculateTerritoriesMessage)) {
+			
+			colourTerritories();
+			return true;
+		}
+		return false;
 	}
 }
