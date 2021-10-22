@@ -54,7 +54,7 @@ class HexSprite extends Bitmap {
     //     };
     // }
 
-        public function initInteraction() {
+    public function initInteraction() {
 		var polys: Polygons = new Polygons();
 		polys.push(new Polygon(hex.polygonCorners()));
 		interaction = new h2d.Interactive(0, 0, this, new PolygonCollider(polys, true));

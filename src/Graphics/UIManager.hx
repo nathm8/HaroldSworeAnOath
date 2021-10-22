@@ -1,3 +1,4 @@
+import GameState.messageManager;
 import h2d.Text;
 import h2d.Flow;
 import Constants;
@@ -16,6 +17,8 @@ class UIManager implements MessageListener {
     var selectedUnitGhost: UnitSprite;
     var selectedHex: Bitmap;
     var movementHexes: Array<Bitmap>;
+    var gameState(get, never): GameState;
+    var currentPlayer(get, never): Int;
     
     // top row UI
     var gui: GUI;
@@ -33,18 +36,25 @@ class UIManager implements MessageListener {
 
 	public function receiveMessage(msg:Message):Bool {
         if (Std.isOfType(msg, HexClickMessage)) {
+            // can't do anything if not our turn
+            if (currentPlayer != gameState.humanPlayer) return true;
             var hex = cast(msg, HexClickMessage).hex;
             if (selectedUnit == null) {
-				var unit = gameScene.gameState.hexToUnits[hex].knight;
-                if (unit != null && unit.canMove && unit.owner == gameScene.gameState.currentTurn) {
-					selectedUnit = gameScene.unitToUnitSprites[unit];
+				var unit = gameState.hexToUnits[hex].knight;
+                if (unit != null && unit.canMove && unit.owner == currentPlayer) {
+                    selectedUnit = gameScene.unitToUnitSprites[unit];
                     animateUnitSelection();
                     setMovementHexesPosition(hex);
                     return true;
                 }
+                unit = gameState.hexToUnits[hex].town;
+				if (unit != null && unit.owner != currentPlayer && gameState.canBuy(currentPlayer, unit.owner) && currentPlayer == gameState.humanPlayer) {
+					messageManager.sendMessage(new BuyTownMessage(hex, currentPlayer));
+					return true;
+				}
             }
-			else if (gameScene.gameState.canMove(selectedUnit.unit.position, hex)) {
-				var is_attack = gameScene.gameState.canAttack(selectedUnit.unit.position, hex);
+			else if (gameState.canMove(selectedUnit.unit.position, hex)) {
+				var is_attack = gameState.canAttack(selectedUnit.unit.position, hex);
 				animateUnitMovement(selectedUnit.unit.position, hex, is_attack);
                 messageManager.sendMessage(new KnightMoveMessage(selectedUnit.unit.position, hex));
                 selectedUnit = null;
@@ -55,7 +65,7 @@ class UIManager implements MessageListener {
             }
         }
         if (Std.isOfType(msg, HexOverMessage)) {
-			var hex = cast(msg, HexOverMessage).hex;
+            var hex = cast(msg, HexOverMessage).hex;
 			var p = hex.toPixel();
             selectedHex.x = p.x;
             selectedHex.y = p.y;
@@ -65,11 +75,20 @@ class UIManager implements MessageListener {
                     selectedUnitGhost.y = p.y-6;
                 }
             } else {
-				var unit = gameScene.gameState.hexToUnits[hex].town;
-                if (unit != null && unit.owner != gameScene.gameState.currentTurn) {
-                    new CostIndicator(hex, gameScene, unit.owner);
+                var unit = gameState.hexToUnits[hex].town;
+                if (unit != null && unit.owner != currentPlayer) {
+                    new CostIndicator(hex, gameScene, unit.owner, gameState.canBuy(currentPlayer, unit.owner));
                 }
             }
+            return true;
+        }
+		if (Std.isOfType(msg, AIMoveMessage)) {
+			var fromHex = cast(msg, AIMoveMessage).fromHex;
+			var toHex = cast(msg, AIMoveMessage).toHex;
+			var is_attack = gameState.canAttack(fromHex, toHex);
+			animateUnitMovement(fromHex, toHex, is_attack);
+			messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
+            return true;
         }
         return false;
 	}
@@ -100,7 +119,7 @@ class UIManager implements MessageListener {
     function setMovementHexesPosition(h: Hex) {
         var neighbours = h.ring(1);
         for (i in 0...6) {
-			if (!gameScene.gameState.canMove(h, neighbours[i]))
+			if (!gameState.canMove(h, neighbours[i]))
                 continue;
             movementHexes[i].visible = true;
             var p = neighbours[i].toPixel();
@@ -127,11 +146,20 @@ class UIManager implements MessageListener {
 	function animateUnitMovement(from:Hex, to:Hex, is_attack: Bool) {
         var orig = from.toPixel();
         var targ = to.toPixel();
-		tweenManager.add(new MoveBounceTween(selectedUnit, orig, targ, 0, .75));
-        tweenManager.add(new RaiseTween(selectedUnit, targ.y, targ.y + 3, -0.9, 0.5));
-		tweenManager.add(new ColourTween(selectedUnit, COLOURS[selectedUnit.unit.owner], COLOURS_GREYED[selectedUnit.unit.owner], -0.9, 0.5));
+        var unitsprite_to_move = gameScene.unitToUnitSprites[gameState.hexToUnits[from].knight];
+		tweenManager.add(new MoveBounceTween(unitsprite_to_move, orig, targ, 0, .75));
+        tweenManager.add(new RaiseTween(unitsprite_to_move, targ.y, targ.y + 3, -0.9, 0.5));
+		tweenManager.add(new ColourTween(unitsprite_to_move, COLOURS[unitsprite_to_move.unit.owner], COLOURS_GREYED[unitsprite_to_move.unit.owner], -0.9, 0.5));
         if (!is_attack) return;
         var back = to.add(to.subtract(from));
-		tweenManager.add(new MoveBounceTween(gameScene.unitToUnitSprites[gameScene.gameState.hexToUnits[to].knight], to.toPixel(), back.toPixel(), 0, .75, true));
+		tweenManager.add(new MoveBounceTween(gameScene.unitToUnitSprites[gameState.hexToUnits[to].knight], to.toPixel(), back.toPixel(), 0, .75, true));
     }
+
+	function get_gameState():GameState {
+		return gameScene.gameState;
+	}
+    
+	function get_currentPlayer():Int {
+		return gameState.currentPlayer;
+	}
 }

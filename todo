@@ -5,29 +5,50 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ======================================================
                         Bugs
 ------------------------------------------------------
-Map seeds not determining everything about the map, need to find where
-other random calls are creeping in. Noticed maps changed at midnight
+- Map seeds not determining everything about the map, need to find where other random calls are creeping in. Noticed maps changed at midnight
+    - don't think this is still happening?
+- adjust end turn hitbox
 
-make sure player is assigned a colour which spawns
 
+------------------------------------------------------
+                   Balance\Gameplay
+------------------------------------------------------
+- ensure player doesn't start in the weakest or strongest position
+- make knights of recently bought towns not able to move (so AI looks less dumb)\slightly reduce snowballing
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
-- buy town logic
-- turns
 - AI
 
 - main menu sequence
+    - rules text
 - gameover sequence
-- GUI
-    - tween in the GUI
-    - tween up\down the numbers
-    - have crowns shoot at purchased town
+    - win
+    - lose
 
 ------------------------------------------------------
                         AI
 ------------------------------------------------------
-0) buy any town we can afford, most expensive first
-1) attack adjacent enemies
-2) move in direction that gets us the most territory, if none move towards
-   closest enemy knight
+- if two adjacent enemies in castle and we're in the castle, stay in it
+
+------------------------------------------------------
+                       Juice
+------------------------------------------------------   
+- when mousing over end turn highlight\jiggle unmoved knights
+- put UIManager.animateUnitMovement into HexSprite
+    - so move tween is from actual position instead of snapping down after pickup
+- some font colours a bit hard to read on CostIndicator
+- GUI
+    - tween in the GUI
+    - tween up\down the numbers
+    - have crowns shoot at purchased town from GUI
+
+------------------------------------------------------   
+                      Project
+------------------------------------------------------   
+- package and put on Itch
+    - submit to gamejam
+- upload to git
+    - pick an OS license
+- comment, lol
+- refactor

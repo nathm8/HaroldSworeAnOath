@@ -1,3 +1,4 @@
+import hxd.Event;
 import MessageManager;
 import h2d.Text;
 import MessageManager.Message;
@@ -9,45 +10,55 @@ final messageManager = MessageManager.singleton;
 
 class GUI implements MessageListener {
 
+	var buttonText:Text;
     var landText:Text;
     var rightText:Text;
     var gameScene: GameScene;
+	var backgroundButton: Bitmap;
+	var right: Bitmap;
+	var land: Bitmap;
 
     public function new(gs: GameScene) {
         gameScene = gs;
 		var backgroundButtonTile = hxd.Res.img.ButtonBG.toTile();
 		backgroundButtonTile.setCenterRatio();
-		var backgroundButton = new Bitmap(backgroundButtonTile, gameScene);
+		backgroundButton = new Bitmap(backgroundButtonTile, gameScene);
 		backgroundButton.x = 500;
 		backgroundButton.y = 750;
-		backgroundButton.color = COLOURS[gameScene.gameState.currentTurn];
-		var buttonText = new h2d.Text(hxd.res.DefaultFont.get(), backgroundButton);
+		backgroundButton.color = COLOURS[gameScene.gameState.currentPlayer];
+		buttonText = new h2d.Text(hxd.res.DefaultFont.get(), backgroundButton);
 		buttonText.y = -10;
 		buttonText.text = "End Turn";
 		buttonText.textAlign = Center;
 
+		var interaction = new h2d.Interactive(backgroundButton.width, backgroundButton.height, backgroundButton);
+		interaction.onClick = function(event:Event) {
+			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
+				messageManager.sendMessage(new EndTurnMessage());
+		};
+
 		var rightTile = hxd.Res.img.Right.toTile();
 		rightTile.setCenterRatio();
-		var right = new Bitmap(rightTile, gameScene);
+		right = new Bitmap(rightTile, gameScene);
 		right.x = 400;
 		right.y = 750;
-		right.color = COLOURS[gameScene.gameState.currentTurn];
+		right.color = COLOURS[gameScene.gameState.currentPlayer];
 		rightText = new h2d.Text(hxd.res.DefaultFont.get(), right);
-		rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentTurn]);
+		rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
 		rightText.textAlign = Center;
-		rightText.x = 0.5;
+		rightText.x = -0.5;
 		rightText.y = -9;
 
 		var landTile = hxd.Res.img.Hex.toTile();
 		landTile.setCenterRatio();
-		var land = new Bitmap(landTile, gameScene);
+		land = new Bitmap(landTile, gameScene);
 		land.x = 600;
 		land.y = 750;
-		land.color = COLOURS[gameScene.gameState.currentTurn];
+		land.color = COLOURS[gameScene.gameState.currentPlayer];
 		landText = new h2d.Text(hxd.res.DefaultFont.get(), land);
-		landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentTurn]);
+		landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
         landText.textAlign = Center;
-        landText.x = 0.5;
+        landText.x = -0.5;
 		landText.y = -9;
 
 		messageManager.addListener(this);
@@ -55,8 +66,15 @@ class GUI implements MessageListener {
 
 	public function receiveMessage(msg:Message):Bool {
 		if (Std.isOfType(msg, UpdateEconomyGUIMessage)) {
-			landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentTurn]);
-			rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentTurn]);
+			backgroundButton.color = COLOURS[gameScene.gameState.currentPlayer];
+			right.color = COLOURS[gameScene.gameState.currentPlayer];
+			land.color = COLOURS[gameScene.gameState.currentPlayer];
+			landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
+			rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
+			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
+				buttonText.text = "End Turn";
+			else
+				buttonText.text = "AI's Turn";
             return true;
         }
         return false;

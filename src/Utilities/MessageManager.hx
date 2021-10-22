@@ -48,6 +48,47 @@ class UpdateEconomyGUIMessage extends Message {
 	}
 }
 
+class EndTurnMessage extends Message {
+	public function new() {
+		name = "EndTurnMessage";
+	}
+}
+
+class StandUpMessage extends Message {
+	public var unit:Unit;
+	public function new(u:Unit) {
+		unit = u;
+		name = "StandUpMessage";
+	}
+}
+
+class UpdateKnightColourMessage extends Message {
+	public var unit:Unit;
+	public function new(u:Unit) {
+		unit = u;
+		name = "UpdateKnightColourMessage";
+	}
+}
+
+class BuyTownMessage extends Message {
+	public var hex:Hex;
+	public var player:Int;
+	public function new(h:Hex, p:Int) {
+		hex = h; player=p;
+		name = "BuyTownMessage";
+	}
+}
+
+class AIMoveMessage extends Message {
+	public var fromHex:Hex;
+	public var toHex:Hex;
+
+	public function new(f:Hex, t:Hex) {
+		name = "AIMoveMessage";
+		fromHex = f;
+		toHex = t;
+	}
+}
 
 interface MessageListener {
     public function receiveMessage(msg: Message): Bool;
@@ -69,6 +110,7 @@ class MessageManager {
     public function sendMessage(msg: Message) {
         for (l in listeners)
             if (l.receiveMessage(msg)) return;
+		trace("unconsumed message", msg);
     }
 
 	public function reset() {

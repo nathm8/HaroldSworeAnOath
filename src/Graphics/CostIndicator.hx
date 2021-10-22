@@ -7,13 +7,15 @@ final tweenManager = TweenManager.singleton;
 
 class CostIndicator extends Object {
 
-    public function new(h: Hex, gameScene: GameScene, owner_id: Int) {
+    public function new(h: Hex, gameScene: GameScene, owner_id: Int, can_buy: Bool) {
         super(gameScene);
         var p = h.toPixel(); x = p.x; y = p.y - 20;
 		var cost = new h2d.Text(hxd.res.DefaultFont.get(), this);
 		cost.text = Std.string(gameScene.gameState.land[owner_id]);
         cost.textAlign = Center;
-		cost.color = COLOURS[7];
+        cost.color = COLOURS[7];
+        if (can_buy)
+		    cost.color = COLOURS[gameScene.gameState.currentPlayer];
 
         tweenManager.add(new FadeOutTween(this, 0, 2));
     }
