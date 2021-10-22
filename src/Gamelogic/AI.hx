@@ -36,6 +36,7 @@ class AI {
             }
             // otherwise move towards nearest enemy unit
             else {
+                var no_move = true;
                 var min_d = 100;
                 var n = new Hex(0,0,0);
 				for (e in gs.units) {
@@ -45,8 +46,10 @@ class AI {
 					if (path.length > 1 && path.length < min_d && gs.canMove(u.position, path[path.length-2])) {
 						min_d = path.length;
 						n = path[path.length-2];
+						no_move = false;
                     }
                 }
+                if (no_move) continue;
 				var m = new AIMoveMessage(u.position, n);
                 gs.moveKnight(u.position, n, true);
                 moves.push(m);

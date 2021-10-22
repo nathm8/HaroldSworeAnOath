@@ -5,13 +5,10 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ======================================================
                         Bugs
 ------------------------------------------------------
-- cascade when buying\conquering a town whose knight is in another town is not handled
 
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
-- ensure player doesn't start in the weakest or strongest position
-- layer all knights over castles
 - moar seeds lol
 ------------------------------------------------------
                         Roadmap

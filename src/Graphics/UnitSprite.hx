@@ -1,3 +1,4 @@
+import h2d.Scene;
 import UIManager.messageManager;
 import Constants;
 import TweenManager;
@@ -17,11 +18,15 @@ class UnitSprite extends Bitmap implements MessageListener{
     static var init = false;
     static var unitTypeToTiles = new Map<UnitType, Tile>();
 
-    public function new(u: Unit, ?parent: Object) {
+    public function new(u: Unit, parent: Object) {
         if (!init)
             initialise();
         unit = u;
-		super(unitTypeToTiles[unit.type], parent);
+		super(unitTypeToTiles[unit.type]);
+        var child_pos = 0; // start for towns
+        if (unit.type == Knight)
+			child_pos = parent.children.length-1; // end for knights
+        parent.addChildAt(this, child_pos);
         color = COLOURS[unit.owner];
         x = unit.position.toPixel().x;
         y = unit.position.toPixel().y;

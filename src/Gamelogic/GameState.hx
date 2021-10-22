@@ -142,6 +142,7 @@ class GameState implements MessageListener {
 		var from_knight = hexToUnits[from].knight;
 		var to_knight = hexToUnits[to].knight;
         var to_town = hexToUnits[to].town;
+		trace("canAttack", to, to_town);
         // can't attack without two knights
 		if (from_knight == null || to_knight == null)
             return false;
@@ -181,17 +182,19 @@ class GameState implements MessageListener {
         return false;
 	}
 
-    function moveKnight(from: Hex, to: Hex, silent=false) {
+    function moveKnight(from: Hex, to: Hex, silent=false, tire=true) {
+        trace("moveKnight", from, to);
 		if (canAttack(from, to)) {
 			var unit = hexToUnits[to].knight;
-			unit.position = to.add(to.subtract(from));
-			hexToUnits[unit.position].knight = unit;
+			moveKnight(unit.position, to.add(to.subtract(from)), true, false);
+			// hexToUnits[unit.position].knight = unit;
 		}
 		var unit = hexToUnits[from].knight;
 		unit.position = to;
-		unit.canMove = false;
+		unit.canMove = !tire;
 		hexToUnits[unit.position].knight = unit;
-		hexToUnits[from].knight = null;
+        if (!from.equals(to))
+		    hexToUnits[from].knight = null;
 		if (hexToUnits[to].town != null && hexToUnits[to].town.owner != unit.owner)
 			conquerTown(to, unit.owner, silent);
 		// else branch just to prevent Recalc being called twice, as double tweens can look glitchy
@@ -241,7 +244,7 @@ class GameState implements MessageListener {
 		var delay = 0.0;
 		for (m in AI.aiTurn(clone())) {
 			tweenManager.add(new DelayedCallTween(() -> messageManager.sendMessage(m), -delay, 0));
-			delay += 1.5;
+			delay += 1.0;
 		}
     }
 
@@ -263,7 +266,8 @@ class GameState implements MessageListener {
 		for (u in units)
 			if (u.home == town) {
                 u.owner = buyer;
-                u.canMove = false;
+                // move newly converted knight into their current position, in case they are garrisoning a castle
+                moveKnight(u.position, u.position);
                 if (!silent)
 				    messageManager.sendMessage(new UpdateKnightColourMessage(u));
 				break;
