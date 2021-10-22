@@ -204,6 +204,7 @@ class GameState implements MessageListener {
             if (u.type != Knight) continue;
 			var moves_priorities = new PriorityQueue<Hex>();
             for (n in u.position.ring(1)) {
+                if (!hexSet.exists(n)) continue;
                 // attacking enemies a priority
                 if (canAttack(u.position, n))
                     moves_priorities.push(n, 1);

@@ -8,18 +8,19 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 - Map seeds not determining everything about the map, need to find where other random calls are creeping in. Noticed maps changed at midnight
     - don't think this is still happening?
 - adjust end turn hitbox
+- cascade when buying\conquering a town whose knight is in another town is not handled
+- AI knights moving on-top of each other
+    - AI is queueing moves based on the current game state, but earlier orders invalidate order ones V_V
+    - need a completely detached GameState from the one being displayed
 
 
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
 - ensure player doesn't start in the weakest or strongest position
-- make knights of recently bought towns not able to move (so AI looks less dumb)\slightly reduce snowballing
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
-- AI
-
 - main menu sequence
     - rules text
 - gameover sequence
