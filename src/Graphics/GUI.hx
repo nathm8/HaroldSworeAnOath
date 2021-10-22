@@ -1,3 +1,7 @@
+import h2d.col.Point;
+import h2d.col.Polygon;
+import h2d.col.Polygons;
+import h2d.col.PolygonCollider;
 import hxd.Event;
 import MessageManager;
 import h2d.Text;
@@ -31,7 +35,14 @@ class GUI implements MessageListener {
 		buttonText.text = "End Turn";
 		buttonText.textAlign = Center;
 
-		var interaction = new h2d.Interactive(backgroundButton.width, backgroundButton.height, backgroundButton);
+		var polys:Polygons = new Polygons();
+		polys.push(new Polygon([
+			new Point(-60, -22.5),
+			new Point(60, -22.5),
+			new Point(60, 22.5),
+			new Point(-60, 22.5)
+		]));
+		var interaction = new h2d.Interactive(0, 0, backgroundButton, new PolygonCollider(polys, true));
 		interaction.onClick = function(event:Event) {
 			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
 				messageManager.sendMessage(new EndTurnMessage());
@@ -46,7 +57,7 @@ class GUI implements MessageListener {
 		rightText = new h2d.Text(hxd.res.DefaultFont.get(), right);
 		rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
 		rightText.textAlign = Center;
-		rightText.x = -0.5;
+		// rightText.x = -0.5;
 		rightText.y = -9;
 
 		var landTile = hxd.Res.img.Hex.toTile();
@@ -58,7 +69,7 @@ class GUI implements MessageListener {
 		landText = new h2d.Text(hxd.res.DefaultFont.get(), land);
 		landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
         landText.textAlign = Center;
-        landText.x = -0.5;
+        // landText.x = -0.5;
 		landText.y = -9;
 
 		messageManager.addListener(this);

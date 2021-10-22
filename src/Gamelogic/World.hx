@@ -2,16 +2,6 @@ import hxd.Rand;
 import haxe.ds.HashMap;
 import Set;
 
-class OwnerDist {
-	public var dist:Int;
-	public var owner:Int;
-
-	public function new(o:Int, d:Int) {
-		dist = d;
-		owner = o;
-	}
-}
-
 class World{
 	public var hexes:  Array<Hex>;
 	public var hexSet(get, default): Set<Hex>;
@@ -191,9 +181,9 @@ class World{
     // returns:
     //          map of Hex to int, the owning player's index. With -1 for neutral hexes
     //          map of the closest unit to each owned hex, for animation purposes
-    public function determineTerritories(units: Array<Unit>): HashMap<Hex, OwnerDist> {
+    public function determineTerritories(units: Array<Unit>): HashMap<Hex, {owner: Int, dist: Int}> {
         // trace("determineTerritories : start");
-		var territories = new HashMap<Hex, OwnerDist>();
+		var territories = new HashMap<Hex, {owner: Int, dist: Int}>();
         for (h in hexes) {
             var min_d = 100;
             var closest_units = [];
@@ -223,7 +213,7 @@ class World{
                 if (u.owner != owner)
                     same_owner = false;
             if (!same_owner) owner = -1;
-            territories[h] = new OwnerDist(owner, min_d);
+			territories[h] = {owner: owner, dist: min_d};
         }
 		return territories;
     }

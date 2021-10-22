@@ -11,7 +11,7 @@ class CostIndicator extends Object {
         super(gameScene);
         var p = h.toPixel(); x = p.x; y = p.y - 20;
 		var cost = new h2d.Text(hxd.res.DefaultFont.get(), this);
-		cost.text = Std.string(gameScene.gameState.land[owner_id]);
+		cost.text = Std.string(2*gameScene.gameState.land[owner_id]);
         cost.textAlign = Center;
         cost.color = COLOURS[7];
         if (can_buy)

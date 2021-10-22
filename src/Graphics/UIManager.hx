@@ -1,6 +1,3 @@
-import GameState.messageManager;
-import h2d.Text;
-import h2d.Flow;
 import Constants;
 import TweenManager;
 import h2d.Bitmap;
@@ -55,8 +52,9 @@ class UIManager implements MessageListener {
             }
 			else if (gameState.canMove(selectedUnit.unit.position, hex)) {
 				var is_attack = gameState.canAttack(selectedUnit.unit.position, hex);
-				animateUnitMovement(selectedUnit.unit.position, hex, is_attack);
-                messageManager.sendMessage(new KnightMoveMessage(selectedUnit.unit.position, hex));
+				animateUnitMovement(selectedUnit.unit.position, hex, is_attack, selectedUnit.unit.position == hex);
+				if (selectedUnit.unit.position != hex)
+                    messageManager.sendMessage(new KnightMoveMessage(selectedUnit.unit.position, hex));
                 selectedUnit = null;
                 selectedUnitGhost.remove();
 				selectedUnitGhost = null;
@@ -76,7 +74,7 @@ class UIManager implements MessageListener {
                 }
             } else {
                 var unit = gameState.hexToUnits[hex].town;
-                if (unit != null && unit.owner != currentPlayer) {
+				if (unit != null && unit.owner != currentPlayer && currentPlayer == gameState.humanPlayer) {
                     new CostIndicator(hex, gameScene, unit.owner, gameState.canBuy(currentPlayer, unit.owner));
                 }
             }
@@ -143,11 +141,12 @@ class UIManager implements MessageListener {
 		tweenManager.add(new RaiseTween(selectedUnit, selectedUnit.y, selectedUnit.y - 6, 0, 0.5));
     }
     
-	function animateUnitMovement(from:Hex, to:Hex, is_attack: Bool) {
+	function animateUnitMovement(from:Hex, to:Hex, is_attack: Bool, is_cancel=false) {
         var orig = from.toPixel();
         var targ = to.toPixel();
         var unitsprite_to_move = gameScene.unitToUnitSprites[gameState.hexToUnits[from].knight];
 		tweenManager.add(new MoveBounceTween(unitsprite_to_move, orig, targ, 0, .75));
+        if (is_cancel) return;
         tweenManager.add(new RaiseTween(unitsprite_to_move, targ.y, targ.y + 3, -0.9, 0.5));
 		tweenManager.add(new ColourTween(unitsprite_to_move, COLOURS[unitsprite_to_move.unit.owner], COLOURS_GREYED[unitsprite_to_move.unit.owner], -0.9, 0.5));
         if (!is_attack) return;

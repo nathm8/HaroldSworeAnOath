@@ -5,19 +5,14 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ======================================================
                         Bugs
 ------------------------------------------------------
-- Map seeds not determining everything about the map, need to find where other random calls are creeping in. Noticed maps changed at midnight
-    - don't think this is still happening?
-- adjust end turn hitbox
 - cascade when buying\conquering a town whose knight is in another town is not handled
-- AI knights moving on-top of each other
-    - AI is queueing moves based on the current game state, but earlier orders invalidate order ones V_V
-    - need a completely detached GameState from the one being displayed
-
 
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
 - ensure player doesn't start in the weakest or strongest position
+- layer all knights over castles
+- moar seeds lol
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
@@ -31,6 +26,8 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
                         AI
 ------------------------------------------------------
 - if two adjacent enemies in castle and we're in the castle, stay in it
+- buy the most influencial castle (by some guess)
+    - closest to existing castle, perhaps
 
 ------------------------------------------------------
                        Juice
@@ -38,11 +35,15 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 - when mousing over end turn highlight\jiggle unmoved knights
 - put UIManager.animateUnitMovement into HexSprite
     - so move tween is from actual position instead of snapping down after pickup
+- highlight which knight belongs to a castle with CostIndicator
+    - outline sprite?
 - some font colours a bit hard to read on CostIndicator
+    - bg sprite?
 - GUI
-    - tween in the GUI
     - tween up\down the numbers
     - have crowns shoot at purchased town from GUI
+    - delay after turn ends so we can see DR go up
+    - have hexes shoot at DR symbol
 
 ------------------------------------------------------   
                       Project

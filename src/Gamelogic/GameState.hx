@@ -9,10 +9,11 @@ import hxd.Rand;
 
 final messageManager = MessageManager.singleton;
 
+@:allow(AI)
 class GameState implements MessageListener {
 
     public var world: World;
-    public var hexSet(get, null): Set<Hex>;
+    public var hexSet(get, never): Set<Hex>;
     public var hexes(get, never): Array<Hex>;
     public var pathfinder(get, never): Astar;
     public var units: Array<Unit>;
@@ -21,10 +22,11 @@ class GameState implements MessageListener {
 	public var divineRight: Map<Int, Int>;
     public var land: Map<Int, Int>;
     public var eliminated: Map<Int, Bool>;
-	var territories:HashMap<Hex, OwnerDist>;
+	var territories:HashMap<Hex, {owner: Int, dist: Int}>;
     public var humanPlayer: Int;
 
-    public function new() {
+    public function new(generate=true) {
+        if (!generate) return;
         world = new World(50);
         world.generateWorld();
 		hexToUnits = new HashMap<Hex, {town:Unit, knight:Unit}>();
@@ -61,6 +63,43 @@ class GameState implements MessageListener {
 		messageManager.addListener(this);
     }
 
+    // clone constructor used by AI to look ahead in moves
+    function clone(): GameState {
+        var gs = new GameState(false);
+        // world is never written to outside worldgen, so fine to be shallow reference
+        // ditto hex keys later
+		gs.world = world; 
+        // primitive types, no clone needed
+        gs.currentPlayer = currentPlayer;
+        gs.humanPlayer = humanPlayer;
+        // deep cloning starts
+		gs.hexToUnits = new HashMap<Hex, {town: Unit, knight: Unit}>();
+		for (h in world.hexes)
+			gs.hexToUnits[h] = {town: null, knight: null};
+		gs.units = new Array<Unit>();
+        for (u in units) {
+			var gsu = u.clone();
+            gs.units.push(gsu);
+			if (gsu.type == Knight)
+				gs.hexToUnits[gsu.position].knight = gsu;
+            else
+				gs.hexToUnits[gsu.position].town = gsu;
+        }
+		gs.divineRight = new Map<Int, Int>();
+        for (p => dr in divineRight)
+			gs.divineRight[p] = dr;
+		gs.land = new Map<Int, Int>();
+        for (p => l in land)
+			gs.land[p] = l;
+		gs.eliminated = new Map<Int, Bool>();
+        for (p => e in eliminated)
+            gs.eliminated[p] = e;
+		gs.territories = new HashMap<Hex, {owner: Int, dist: Int}>();
+        for (h => od in territories)
+            gs.territories[h] = {owner: od.owner, dist: od.dist}
+        return gs;
+    }
+
     function get_hexes():Array<Hex> {
         return world.hexes;
     }
@@ -91,7 +130,7 @@ class GameState implements MessageListener {
         if (!in_range)
             return false;
         // can attack if destination is occupied
-		if (to_knight != null && !canAttack(from, to))
+		if (to_knight != null && to_knight != from_knight && !canAttack(from, to))
             return false;
         return true;
     }
@@ -126,20 +165,7 @@ class GameState implements MessageListener {
 		if (Std.isOfType(msg, KnightMoveMessage)) {
             var from = cast(msg, KnightMoveMessage).fromHex;
 			var to = cast(msg, KnightMoveMessage).toHex;
-            if (canAttack(from, to)) {
-                var unit = hexToUnits[to].knight;
-				unit.position = to.add(to.subtract(from));
-				hexToUnits[unit.position].knight = unit;
-            }
-            var unit = hexToUnits[from].knight;
-            unit.position = to;
-            unit.canMove = false;
-            hexToUnits[unit.position].knight = unit;
-            hexToUnits[from].knight = null;
-			if (hexToUnits[to].town != null && hexToUnits[to].town.owner != unit.owner)
-                conquerTown(to, unit.owner);
-            else // just to prevent Recalc being called twice, as double tweens can look glitchy
-			    messageManager.sendMessage(new RecalculateTerritoriesMessage());
+            moveKnight(from, to);
             return true;
         }
 		if (Std.isOfType(msg, EndTurnMessage)) {
@@ -150,15 +176,34 @@ class GameState implements MessageListener {
 			var hex = cast(msg, BuyTownMessage).hex;
 			var player = cast(msg, BuyTownMessage).player;
             buyTown(hex, player);
+            return true;
         }
         return false;
 	}
+
+    function moveKnight(from: Hex, to: Hex, silent=false) {
+		if (canAttack(from, to)) {
+			var unit = hexToUnits[to].knight;
+			unit.position = to.add(to.subtract(from));
+			hexToUnits[unit.position].knight = unit;
+		}
+		var unit = hexToUnits[from].knight;
+		unit.position = to;
+		unit.canMove = false;
+		hexToUnits[unit.position].knight = unit;
+		hexToUnits[from].knight = null;
+		if (hexToUnits[to].town != null && hexToUnits[to].town.owner != unit.owner)
+			conquerTown(to, unit.owner, silent);
+		// else branch just to prevent Recalc being called twice, as double tweens can look glitchy
+		else if (!silent) 
+			messageManager.sendMessage(new RecalculateTerritoriesMessage());
+    }
 
 	function get_hexSet():Set<Hex> {
 		return world.hexSet;
 	}
 
-	public function determineTerritories() : HashMap<Hex, OwnerDist> {
+	public function determineTerritories() : HashMap<Hex, {owner: Int, dist: Int}> {
 		territories = world.determineTerritories(units);
         return territories;
 	}
@@ -193,102 +238,25 @@ class GameState implements MessageListener {
 		messageManager.sendMessage(new UpdateEconomyGUIMessage());
         if (currentPlayer == humanPlayer) return;
         // AI
-        aiTurn();
-    }
-
-	function aiTurn() {
-        var moves = new Array<Message>();
-        trace("ai turn", currentPlayer);
-        for (u in units) {
-            if (u.owner != currentPlayer) continue;
-            if (u.type != Knight) continue;
-			var moves_priorities = new PriorityQueue<Hex>();
-            for (n in u.position.ring(1)) {
-                if (!hexSet.exists(n)) continue;
-                // attacking enemies a priority
-                if (canAttack(u.position, n))
-                    moves_priorities.push(n, 1);
-                // defending our town high priority
-				if (hexToUnits[n].town != null && hexToUnits[n].town.owner == currentPlayer) {
-                    for (tn in n.ring(1))
-						if (hexToUnits[tn].knight != null && hexToUnits[tn].knight.owner != currentPlayer){
-                            moves_priorities.push(n, 10);
-                            break;
-                        }
-                }
-                // capturing towns highest priority
-				if (canMove(u.position, n) && hexToUnits[n].knight == null && hexToUnits[n].town != null && hexToUnits[n].town.owner != currentPlayer)
-                    moves_priorities.push(n, 100);
-            }
-            // if we have a priority move take it
-            if (moves_priorities.size() > 0) {
-				var m = moves_priorities.pop();
-				trace("taking priority move", m);
-				moves.push(new AIMoveMessage(u.position, m));
-            }
-            // otherwise move towards nearest enemy unit
-            else {
-                var min_d = 100;
-                var n = new Hex(0,0,0);
-				for (e in units) {
-                    if (e.owner == currentPlayer)
-						continue;
-                    var path = pathfinder.findPath(u.position, e.position);
-                    if (path.length < min_d && canMove(u.position, path[path.length-2])) {
-						min_d = path.length;
-						n = path[path.length-2];
-                    }
-                }
-				var m = new AIMoveMessage(u.position, n);
-                trace("moving towards nearest", m);
-                moves.push(m);
-            }
-        }
-        // create priority queue of (town, cost)
-        // go through all buy all the towns we can, most expensive first
-        // then do another round of troop movement
-		trace("ai turn buying", currentPlayer);
-        var player_land = new Array<{land:Int, player:Int}>();
-        for (p => l in land) player_land.push({land:l, player:p});
-        player_land.sort((a,b) -> a.land-b.land );
-        var dr = divineRight[currentPlayer];
-
-        var biggest = new PriorityQueue<{h:Hex, c:Int}>();
-        for (u in units) {
-            if (u.type == Town && u.owner != currentPlayer && land[u.owner] < dr)
-				biggest.push({h: u.position, c: land[u.owner]}, land[u.owner]);
-        }
-        while (biggest.size() > 0) {
-            var town = biggest.pop();
-            if (town.c > dr) break;
-			dr -= town.c;
-            // the towns' costs will actually go down as we progress here, so AI won't buy as aggressively as it could
-            moves.push(new BuyTownMessage(town.h, currentPlayer));
-        }
-        trace("ai turn buying done", currentPlayer);
-
-		moves.push(new EndTurnMessage());
-        var delay = 0.0;
-        for (m in moves) {
-            trace("queuing move", m);
+		var delay = 0.0;
+		for (m in AI.aiTurn(clone())) {
 			tweenManager.add(new DelayedCallTween(() -> messageManager.sendMessage(m), -delay, 0));
-            delay += 1.5;
-        }
-        trace("ai turn done");
+			delay += 1.5;
+		}
     }
 
 	public function canBuy(buyer:Int, buyee:Int) : Bool {
-		return divineRight[buyer] >= land[buyee];
+		return divineRight[buyer] >= 2*land[buyee];
 	}
 
-	function buyTown(hex:Hex, buyer:Int) {
+	function buyTown(hex:Hex, buyer:Int, silent=false) {
         var town = hexToUnits[hex].town;
         var cost = land[town.owner];
-        divineRight[buyer] -= cost;
-        conquerTown(hex, buyer);
+        divineRight[buyer] -= 2*cost;
+		conquerTown(hex, buyer, silent);
     }
     
-	function conquerTown(hex:Hex, buyer:Int) {
+	function conquerTown(hex:Hex, buyer:Int, silent=false) {
 		var town = hexToUnits[hex].town;
 		var previous_owner = town.owner;
 		town.owner = buyer;
@@ -296,7 +264,8 @@ class GameState implements MessageListener {
 			if (u.home == town) {
                 u.owner = buyer;
                 u.canMove = false;
-				messageManager.sendMessage(new UpdateKnightColourMessage(u));
+                if (!silent)
+				    messageManager.sendMessage(new UpdateKnightColourMessage(u));
 				break;
 			}
         // check if this player has any units left
@@ -309,6 +278,7 @@ class GameState implements MessageListener {
         eliminated[previous_owner] = player_eliminated;
 
         updateIncome();
-        messageManager.sendMessage(new RecalculateTerritoriesMessage());
+		if (!silent)
+            messageManager.sendMessage(new RecalculateTerritoriesMessage());
     }
 }

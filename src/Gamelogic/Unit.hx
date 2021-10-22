@@ -18,4 +18,8 @@ class Unit {
         this.home = home;
     }
 
+    public function clone(): Unit {
+		return new Unit(type, owner, position, home, canMove);
+    }
+
 }
