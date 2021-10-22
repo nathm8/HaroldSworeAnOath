@@ -139,10 +139,12 @@ class GameState implements MessageListener {
 		// has to be somewhere to attack to\from
 		if (!(hexSet.exists(to) && hexSet.exists(from)))
 			return false;
+        // can't attack ourself
+		if (from.equals(to))
+			return false;
 		var from_knight = hexToUnits[from].knight;
 		var to_knight = hexToUnits[to].knight;
         var to_town = hexToUnits[to].town;
-		trace("canAttack", to, to_town);
         // can't attack without two knights
 		if (from_knight == null || to_knight == null)
             return false;
@@ -186,8 +188,11 @@ class GameState implements MessageListener {
         trace("moveKnight", from, to);
 		if (canAttack(from, to)) {
 			var unit = hexToUnits[to].knight;
-			moveKnight(unit.position, to.add(to.subtract(from)), true, false);
-			// hexToUnits[unit.position].knight = unit;
+			var back = to.add(to.subtract(from));
+			unit.position = back;
+            hexToUnits[back].knight = unit;
+			if (hexToUnits[back].town != null && hexToUnits[back].town.owner != unit.owner)
+                conquerTown(back, unit.owner, false, true);
 		}
 		var unit = hexToUnits[from].knight;
 		unit.position = to;
@@ -242,14 +247,21 @@ class GameState implements MessageListener {
         if (currentPlayer == humanPlayer) return;
         // AI
 		var delay = 0.0;
-		for (m in AI.aiTurn(clone())) {
-			tweenManager.add(new DelayedCallTween(() -> messageManager.sendMessage(m), -delay, 0));
+		var moves = AI.aiTurn(clone());
+        for (i in 0...moves.length) {
+			tweenManager.add(new DelayedCallTween(() -> messageManager.sendMessage(moves[i]), -delay, 0));
 			delay += 1.0;
+            // double delay for penultimate move, to give a beat and let tweens complete
+			if (i == moves.length - 2 || moves.length == 1)
+			    delay += 1.0;
 		}
     }
 
-	public function canBuy(buyer:Int, buyee:Int) : Bool {
-		return divineRight[buyer] >= 2*land[buyee];
+    // whether player can buy a castle from another. hex to check 
+    // if there's a foreign knight occupying the town, in which case disallow
+	public function canBuy(buyer:Int, buyee:Int, hex: Hex) : Bool {
+		return divineRight[buyer] >= 2 * land[buyee]
+			&& (hexToUnits[hex].knight == null || hexToUnits[hex].knight.home == hexToUnits[hex].town);
 	}
 
 	function buyTown(hex:Hex, buyer:Int, silent=false) {
@@ -259,7 +271,8 @@ class GameState implements MessageListener {
 		conquerTown(hex, buyer, silent);
     }
     
-	function conquerTown(hex:Hex, buyer:Int, silent=false) {
+	function conquerTown(hex:Hex, buyer:Int, silent=false, skipRecalc=false) {
+        trace("conquer town", hex);
 		var town = hexToUnits[hex].town;
 		var previous_owner = town.owner;
 		town.owner = buyer;
@@ -282,7 +295,7 @@ class GameState implements MessageListener {
         eliminated[previous_owner] = player_eliminated;
 
         updateIncome();
-		if (!silent)
+		if (!silent || skipRecalc)
             messageManager.sendMessage(new RecalculateTerritoriesMessage());
     }
 }

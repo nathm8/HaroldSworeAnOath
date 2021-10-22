@@ -45,15 +45,16 @@ class UIManager implements MessageListener {
                     return true;
                 }
                 unit = gameState.hexToUnits[hex].town;
-				if (unit != null && unit.owner != currentPlayer && gameState.canBuy(currentPlayer, unit.owner) && currentPlayer == gameState.humanPlayer) {
+				if (unit != null && unit.owner != currentPlayer && gameState.canBuy(currentPlayer, unit.owner, hex) && currentPlayer == gameState.humanPlayer) {
 					messageManager.sendMessage(new BuyTownMessage(hex, currentPlayer));
 					return true;
 				}
             }
 			else if (gameState.canMove(selectedUnit.unit.position, hex)) {
 				var is_attack = gameState.canAttack(selectedUnit.unit.position, hex);
-				animateUnitMovement(selectedUnit.unit.position, hex, is_attack, selectedUnit.unit.position == hex);
-				if (selectedUnit.unit.position != hex)
+				var is_cancel = selectedUnit.unit.position.equals(hex);
+				animateUnitMovement(selectedUnit.unit.position, hex, is_attack, is_cancel);
+				if (!is_cancel)
                     messageManager.sendMessage(new KnightMoveMessage(selectedUnit.unit.position, hex));
                 selectedUnit = null;
                 selectedUnitGhost.remove();
@@ -75,7 +76,7 @@ class UIManager implements MessageListener {
             } else {
                 var unit = gameState.hexToUnits[hex].town;
 				if (unit != null && unit.owner != currentPlayer && currentPlayer == gameState.humanPlayer) {
-                    new CostIndicator(hex, gameScene, unit.owner, gameState.canBuy(currentPlayer, unit.owner));
+                    new CostIndicator(hex, gameScene, unit.owner, gameState.canBuy(currentPlayer, unit.owner, hex));
                 }
             }
             return true;
@@ -85,7 +86,7 @@ class UIManager implements MessageListener {
 			var toHex = cast(msg, AIMoveMessage).toHex;
 			var is_attack = gameState.canAttack(fromHex, toHex);
 			animateUnitMovement(fromHex, toHex, is_attack);
-			messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
+            messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
             return true;
         }
         return false;
@@ -144,6 +145,7 @@ class UIManager implements MessageListener {
 	function animateUnitMovement(from:Hex, to:Hex, is_attack: Bool, is_cancel=false) {
         var orig = from.toPixel();
         var targ = to.toPixel();
+		trace("animateUnitMovement", to, from, gameState.hexToUnits[from].knight);
         var unitsprite_to_move = gameScene.unitToUnitSprites[gameState.hexToUnits[from].knight];
 		tweenManager.add(new MoveBounceTween(unitsprite_to_move, orig, targ, 0, .75));
         if (is_cancel) return;

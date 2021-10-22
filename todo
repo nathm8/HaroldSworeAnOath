@@ -5,11 +5,47 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ======================================================
                         Bugs
 ------------------------------------------------------
+src/Gamelogic/GameState.hx:186: moveKnight, Hex(5,-2,-3), Hex(5,-2,-3)
+Log.hx:66 src/Gamelogic/GameState.hx:145: canAttack, Hex(5,-2,-3), {
+    type : Town, 
+    owner : 6, 
+    canMove : true, 
+    position : Hex(5,-2,-3), 
+    home : null, 
+    __id__ : 13024
+}
+GameState.hx:193 Uncaught TypeError: Cannot set properties of null (setting 'position')
+    at GameState.moveKnight (GameState.hx:193)
+    at GameState.conquerTown (GameState.hx:270)
+    at GameState.buyTown (GameState.hx:259)
+    at GameState.receiveMessage (GameState.hx:179)
+    at MessageManager.sendMessage (MessageManager.hx:112)
+    at DelayedCallTween.func (GameState.hx:246)
+    at DelayedCallTween.update (TweenManager.hx:212)
+    at TweenManager.update (TweenManager.hx:229)
+    at Main.update (Main.hx:30)
+    at Main.mainLoop (App.hx:187)
 
+
+src/Gamelogic/GameState.hx:148: canAttack, Hex(-4,-1,5), null
+UIManager.hx:147 Uncaught TypeError: Cannot read properties of null (reading '__id__')
+    at UIManager.animateUnitMovement (UIManager.hx:147)
+    at UIManager.receiveMessage (UIManager.hx:87)
+    at MessageManager.sendMessage (MessageManager.hx:112)
+    at DelayedCallTween.func (GameState.hx:248)
+    at DelayedCallTween.update (TweenManager.hx:212)
+    at TweenManager.update (TweenManager.hx:229)
+    at Main.update (Main.hx:30)
+    at Main.mainLoop (App.hx:187)
+    at hxd_System.browserLoop (System.js.hx:63)
+
+
+knocking an enemy into a castle they don't own doesn't recolour the castle's knight 
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
 - moar seeds lol
+- buying towns with foreign occupants? should be disallowed
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------

@@ -63,18 +63,20 @@ class AI {
         player_land.sort((a,b) -> a.land-b.land );
         var dr = gs.divineRight[gs.currentPlayer];
 
-        var biggest = new PriorityQueue<{h:Hex, c:Int}>();
+        var biggest = new PriorityQueue<Unit>();
 		for (u in gs.units) {
 			if (u.type == Town && u.owner != gs.currentPlayer && gs.land[u.owner] < dr)
-				biggest.push({h: u.position, c: gs.land[u.owner]}, gs.land[u.owner]);
+				biggest.push(u, gs.land[u.owner]);
         }
         while (biggest.size() > 0) {
             var town = biggest.pop();
-            if (town.c > dr) break;
-			dr -= town.c;
-            // the towns' costs will actually go down as we progress here, so AI won't buy as aggressively as it could
-			gs.buyTown(town.h, gs.currentPlayer, true);
-			moves.push(new BuyTownMessage(town.h, gs.currentPlayer));
+            var cost = gs.land[town.owner];
+			if (cost > dr) break;
+			dr -= 2 * cost;
+            if (gs.canBuy(gs.currentPlayer, town.owner, town.position)) {
+                gs.buyTown(town.position, gs.currentPlayer, true);
+                moves.push(new BuyTownMessage(town.position, gs.currentPlayer));
+            }
         }
 
 		moves.push(new EndTurnMessage());
