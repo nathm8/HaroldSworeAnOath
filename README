@@ -1,0 +1,23 @@
+==================================
+      Harold Swore An Oath
+==================================
+A simple feudal hex-based strategy game
+
+​Entry for HaxeJam 2021
+
+==================================
+      Licensed under GPL3
+==================================
+See COPYING for full license.
+
+==================================
+             Notes
+==================================
+
+press r to restart at any time
+
+To buy a castle you need twice the number of Crowns of all the Hexes the colour owns, this is the value that appears when hovering over a castle.
+
+If you have enough crowns but still can't buy a castle that's because it's being occupied by a different knight than the one that came from there. So if you bought it it'd be instantly captured back. Couldn't find a good way to show that in-game, sorry!
+
+There's a couple of AI bugs that will prevent the game from progressing in the late game, haven't seen it unless you're watching a game after you've been eliminated. Again, sorry!
