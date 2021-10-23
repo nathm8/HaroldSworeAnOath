@@ -50,7 +50,8 @@ class GameScene extends Scene implements MessageListener {
 				gameState.world.sortHexesByDirection({s:true, reversed:true});
 		}
 		for (h in gameState.world.hexes) {
-			var hs = new HexSprite(h, this);
+			var hs = new HexSprite(h);
+			add(hs, 0);
 			hexToHexSprites[h] = hs;
 			tweenManager.add(new ScaleBounceTween(hs, -i/gameState.hexes.length, 0.5));
 			i += 1;
@@ -62,7 +63,8 @@ class GameScene extends Scene implements MessageListener {
 	
 	public function drawTowns() {
 		for (unit in gameState.units) {
-			var s = new UnitSprite(unit, this);
+			var s = new UnitSprite(unit);
+			add(s, s.getLayer());
 			unitToUnitSprites[unit] = s;
 			tweenManager.add(new ScaleLinearTween(s, 0, 0.5));
 		}
@@ -74,9 +76,8 @@ class GameScene extends Scene implements MessageListener {
 
 	public function colourTerritories(firstTurn=false) {
 		var territories = gameState.determineTerritories();
-		for (h in gameState.hexes) {
+		for (h in gameState.hexes)
 			hexToHexSprites[h].capturedBy(territories[h].owner, territories[h].dist);
-		}
 		gameState.updateIncome();
 		if (firstTurn) {
 			gameState.getIncome(0, firstTurn);

@@ -5,44 +5,7 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ======================================================
                         Bugs
 ------------------------------------------------------
-src/Gamelogic/GameState.hx:186: moveKnight, Hex(5,-2,-3), Hex(5,-2,-3)
-Log.hx:66 src/Gamelogic/GameState.hx:145: canAttack, Hex(5,-2,-3), {
-    type : Town, 
-    owner : 6, 
-    canMove : true, 
-    position : Hex(5,-2,-3), 
-    home : null, 
-    __id__ : 13024
-}
-GameState.hx:193 Uncaught TypeError: Cannot set properties of null (setting 'position')
-    at GameState.moveKnight (GameState.hx:193)
-    at GameState.conquerTown (GameState.hx:270)
-    at GameState.buyTown (GameState.hx:259)
-    at GameState.receiveMessage (GameState.hx:179)
-    at MessageManager.sendMessage (MessageManager.hx:112)
-    at DelayedCallTween.func (GameState.hx:246)
-    at DelayedCallTween.update (TweenManager.hx:212)
-    at TweenManager.update (TweenManager.hx:229)
-    at Main.update (Main.hx:30)
-    at Main.mainLoop (App.hx:187)
 
-
-src/Gamelogic/GameState.hx:148: canAttack, Hex(-4,-1,5), null
-UIManager.hx:147 Uncaught TypeError: Cannot read properties of null (reading '__id__')
-    at UIManager.animateUnitMovement (UIManager.hx:147)
-    at UIManager.receiveMessage (UIManager.hx:87)
-    at MessageManager.sendMessage (MessageManager.hx:112)
-    at DelayedCallTween.func (GameState.hx:248)
-    at DelayedCallTween.update (TweenManager.hx:212)
-    at TweenManager.update (TweenManager.hx:229)
-    at Main.update (Main.hx:30)
-    at Main.mainLoop (App.hx:187)
-    at hxd_System.browserLoop (System.js.hx:63)
-
-
-knocking an enemy into a castle they don't own doesn't recolour the castle's knight 
-
-- costindicator is behind knight sprite
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
@@ -59,7 +22,6 @@ knocking an enemy into a castle they don't own doesn't recolour the castle's kni
 ------------------------------------------------------
                         AI
 ------------------------------------------------------
-- if two adjacent enemies in castle and we're in the castle, stay in it
 - buy the most influencial castle (by some guess)
     - closest to existing castle, perhaps
 
@@ -67,8 +29,6 @@ knocking an enemy into a castle they don't own doesn't recolour the castle's kni
                        Juice
 ------------------------------------------------------   
 - when mousing over end turn highlight\jiggle unmoved knights
-- put UIManager.animateUnitMovement into HexSprite
-    - so move tween is from actual position instead of snapping down after pickup
 - highlight which knight belongs to a castle with CostIndicator
     - outline sprite?
 - some font colours a bit hard to read on CostIndicator
@@ -76,8 +36,9 @@ knocking an enemy into a castle they don't own doesn't recolour the castle's kni
 - GUI
     - tween up\down the numbers
     - have crowns shoot at purchased town from GUI
-    - delay after turn ends so we can see DR go up
     - have hexes shoot at DR symbol
+- have background not be flat black
+    - slight tint to current player
 
 ------------------------------------------------------   
                       Project

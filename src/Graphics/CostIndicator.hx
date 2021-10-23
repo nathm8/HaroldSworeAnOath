@@ -8,7 +8,8 @@ final tweenManager = TweenManager.singleton;
 class CostIndicator extends Object {
 
     public function new(h: Hex, gameScene: GameScene, owner_id: Int, can_buy: Bool) {
-        super(gameScene);
+        super();
+        gameScene.add(this, 90);
         var p = h.toPixel(); x = p.x; y = p.y - 20;
 		var cost = new h2d.Text(hxd.res.DefaultFont.get(), this);
 		cost.text = Std.string(2*gameScene.gameState.land[owner_id]);

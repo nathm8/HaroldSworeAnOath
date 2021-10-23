@@ -12,6 +12,15 @@ import h2d.Bitmap;
 
 final messageManager = MessageManager.singleton;
 
+final names = [
+	0 => "Gules",
+	1 =>  "Azure",
+	2 =>  "Vert",
+	3 =>  "Sable",
+	4 =>  "Purpure",
+	5 =>  "Or",
+	6 =>  "Argent"];
+
 class GUI implements MessageListener {
 
 	var buttonText:Text;
@@ -85,7 +94,7 @@ class GUI implements MessageListener {
 			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
 				buttonText.text = "End Turn";
 			else
-				buttonText.text = "AI's Turn";
+				buttonText.text = names[gameScene.gameState.currentPlayer]+"'s Turn";
             return true;
         }
         return false;

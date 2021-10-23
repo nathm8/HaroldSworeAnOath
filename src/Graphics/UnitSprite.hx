@@ -18,20 +18,21 @@ class UnitSprite extends Bitmap implements MessageListener{
     static var init = false;
     static var unitTypeToTiles = new Map<UnitType, Tile>();
 
-    public function new(u: Unit, parent: Object) {
+    public function new(u: Unit) {
         if (!init)
             initialise();
         unit = u;
 		super(unitTypeToTiles[unit.type]);
-        var child_pos = 0; // start for towns
-        if (unit.type == Knight)
-			child_pos = parent.children.length-1; // end for knights
-        parent.addChildAt(this, child_pos);
         color = COLOURS[unit.owner];
         x = unit.position.toPixel().x;
         y = unit.position.toPixel().y;
 
         messageManager.addListener(this);
+    }
+
+    public function getLayer(): Int {
+		if (unit.type == Knight) return 1;
+        return 0;
     }
 
     function initialise() {
@@ -55,7 +56,7 @@ class UnitSprite extends Bitmap implements MessageListener{
         }
 		if (Std.isOfType(msg, UpdateKnightColourMessage)) {
 			if (cast(msg, UpdateKnightColourMessage).unit == unit) {
-				trace("UpdateKnightColourMessage");
+				// trace("UpdateKnightColourMessage");
 				tweenManager.add(new RaiseTween(this, y, unit.position.toPixel().y + 3, 0, 0.5));
 				tweenManager.add(new ColourTween(this, color, COLOURS_GREYED[unit.owner], 0, 0.5));
 				return true;

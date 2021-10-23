@@ -8,31 +8,37 @@ class AI {
 			if (u.owner != gs.currentPlayer) continue;
             if (u.type != Knight) continue;
 			var moves_priorities = new PriorityQueue<Hex>();
+            var adjacent_enemies = 0;
             for (n in u.position.ring(1)) {
 				if (!gs.hexSet.exists(n)) continue;
                 // attacking enemies a priority
-				if (gs.canAttack(u.position, n))
+				if (gs.canMove(u.position, n) && gs.canAttack(u.position, n)) {
                     moves_priorities.push(n, 1);
+					adjacent_enemies++;
+                }
                 // defending our town high priority
-				if (gs.hexToUnits[n].town != null && gs.hexToUnits[n].town.owner == gs.currentPlayer) {
+				if (gs.hexToUnits(n).town != null && gs.hexToUnits(n).town.owner == gs.currentPlayer) {
                     for (tn in n.ring(1))
-						if (gs.hexToUnits[tn].knight != null && gs.hexToUnits[tn].knight.owner != gs.currentPlayer){
+						if (gs.hexToUnits(tn).knight != null && gs.hexToUnits(tn).knight.owner != gs.currentPlayer && gs.canMove(u.position, n)){
                             moves_priorities.push(n, 10);
                             break;
                         }
                 }
                 // capturing towns highest priority
 				if (gs.canMove(u.position, n)
-					&& gs.hexToUnits[n].knight == null
-					&& gs.hexToUnits[n].town != null
-					&& gs.hexToUnits[n].town.owner != gs.currentPlayer)
+					&& gs.hexToUnits(n).knight == null
+					&& gs.hexToUnits(n).town != null
+					&& gs.hexToUnits(n).town.owner != gs.currentPlayer)
                     moves_priorities.push(n, 100);
             }
+			// garrisoning our town high priority
+			if (adjacent_enemies >= 2 && gs.hexToUnits(u.position).town != null && gs.canMove(u.position, u.position))
+				moves_priorities.push(u.position, 20);
             // if we have a priority move take it
             if (moves_priorities.size() > 0) {
-				var m = moves_priorities.pop();
-				moves.push(new AIMoveMessage(u.position, m));
-                gs.moveKnight(u.position, m, true);
+				var h = moves_priorities.pop();
+				moves.push(new AIMoveMessage(u.position, h));
+                gs.moveKnight(u.position, h, true);
             }
             // otherwise move towards nearest enemy unit
             else {
@@ -70,11 +76,11 @@ class AI {
         while (biggest.size() > 0) {
             var town = biggest.pop();
             var cost = gs.land[town.owner];
-			if (cost > dr) break;
-			dr -= 2 * cost;
+			if (cost > dr) continue;
             if (gs.canBuy(gs.currentPlayer, town.owner, town.position)) {
                 moves.push(new BuyTownMessage(town.position, gs.currentPlayer));
                 gs.buyTown(town.position, gs.currentPlayer, true);
+                dr -= 2 * cost;
             }
         }
 

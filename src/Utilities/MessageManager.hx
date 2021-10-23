@@ -110,7 +110,7 @@ class MessageManager {
     public function sendMessage(msg: Message) {
         for (l in listeners)
             if (l.receiveMessage(msg)) return;
-		trace("unconsumed message", msg);
+		// trace("unconsumed message", msg);
     }
 
 	public function reset() {

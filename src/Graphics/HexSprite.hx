@@ -47,18 +47,12 @@ class HexSprite extends Bitmap {
         owner = new_owner_id;
     }
 
-    // public function initInteraction() {
-    //     interaction = new h2d.Interactive(0, 0, this, new PixelsCollider(pixels));
-    //     interaction.onClick = function(event: Event) {
-	// 		messageManager.sendMessage(new HexClickMessage(hex));
-    //     };
-    // }
-
     public function initInteraction() {
 		var polys: Polygons = new Polygons();
 		polys.push(new Polygon(hex.polygonCorners()));
 		interaction = new h2d.Interactive(0, 0, this, new PolygonCollider(polys, true));
         interaction.onClick = function(event: Event) {
+            // trace("click at",hex);
 			messageManager.sendMessage(new HexClickMessage(hex));
         };
 		interaction.onOver = function(event:Event) {

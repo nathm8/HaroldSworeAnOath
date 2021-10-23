@@ -15,7 +15,7 @@ class Noisemap {
 	var seed = seeds[Std.random(6)];
 	
 	public function new() {
-		trace(seed);
+		// trace(seed);
 		noise.normalize = true;
 	}
 
