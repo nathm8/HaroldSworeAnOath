@@ -6,13 +6,16 @@ final seeds = [
 	313234,
 	381256,
 	413795,
-	448958];
+	448958,
+	662277,
+	10495343,
+	246784353];
 
 class Noisemap {
 	var noisemap:Array<Array<Float>>;
 	var noise = new Perlin();
-	// var seed = Std.random(1000000);
-	var seed = seeds[Std.random(6)];
+	// var seed = Std.random(0xfffffff);
+	var seed = seeds[Std.random(seeds.length)];
 	
 	public function new() {
 		// trace(seed);

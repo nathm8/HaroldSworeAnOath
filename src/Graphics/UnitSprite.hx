@@ -6,7 +6,6 @@ import MessageManager;
 import Constants.COLOURS;
 import Unit.UnitType;
 import h2d.Tile;
-import h2d.Object;
 import h2d.Bitmap;
 
 final messageManager = MessageManager.singleton;
@@ -17,6 +16,7 @@ class UnitSprite extends Bitmap implements MessageListener{
     public var unit: Unit;
     static var init = false;
     static var unitTypeToTiles = new Map<UnitType, Tile>();
+    public var highlight:Bitmap;
 
     public function new(u: Unit) {
         if (!init)
@@ -57,6 +57,8 @@ class UnitSprite extends Bitmap implements MessageListener{
 		if (Std.isOfType(msg, UpdateKnightColourMessage)) {
 			if (cast(msg, UpdateKnightColourMessage).unit == unit) {
 				// trace("UpdateKnightColourMessage");
+                if (highlight != null)
+				    tweenManager.add(new RaiseTween(highlight, y, unit.position.toPixel().y + 3, 0, 0.5));
 				tweenManager.add(new RaiseTween(this, y, unit.position.toPixel().y + 3, 0, 0.5));
 				tweenManager.add(new ColourTween(this, color, COLOURS_GREYED[unit.owner], 0, 0.5));
 				return true;

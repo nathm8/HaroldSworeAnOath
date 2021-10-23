@@ -49,12 +49,29 @@ class GameState implements MessageListener {
             units.push(knight);
 			owner_id = r.random(7);
         }
+        // init eco
+        divineRight = [0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0];
+        land = [0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0];
+        // determine first player. Can't be the richest or the poorest, nor a play that didn't spawn.
+		determineTerritories();
+        updateIncome();
+        var max_land = 0; var min_land = 100;
+        var max_land_p = 0; var min_land_p = 0;
+        for (p in 0...7) {
+            if (eliminated[p]) continue;
+            if (land[p] > max_land) {
+                max_land = land[p];
+                max_land_p = p;
+            }
+            if (land[p] < min_land) {
+                min_land = land[p];
+                min_land_p = p;
+            }
+        }
 		currentPlayer = Std.random(7);
-        while (eliminated[currentPlayer])
+        while (eliminated[currentPlayer] || currentPlayer == min_land_p || currentPlayer == max_land_p)
             currentPlayer = Std.random(7);
 		humanPlayer = currentPlayer;
-		divineRight = [0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0];
-		land = [0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0];
 		messageManager.addListener(this);
     }
 
@@ -272,7 +289,6 @@ class GameState implements MessageListener {
 			if (i == moves.length - 2 || moves.length == 1)
 			    delay += 1.0;
 		}
-		endGameCheck();
     }
 
     // whether player can buy a castle from another. hex to check 
@@ -313,15 +329,7 @@ class GameState implements MessageListener {
 				    messageManager.sendMessage(new UpdateKnightColourMessage(u));
 				break;
 			}
-        // check if this player has any units left
-        var player_eliminated = true;
-        for (u in units)
-            if (u.owner == previous_owner) {
-                player_eliminated = false;
-                break;
-            }
-        eliminated[previous_owner] = player_eliminated;
-
+		if (!silent) endGameCheck();
         updateIncome();
 		if (!silent && !skipRecalc)
             messageManager.sendMessage(new RecalculateTerritoriesMessage());
@@ -329,22 +337,26 @@ class GameState implements MessageListener {
     
 
 	function endGameCheck() {
-        var surviving_player = 0;
-        var surviving_players = 0;
-        for (p => e in eliminated) {
+        for (p => _ in eliminated)
+            eliminated[p] = true;
+		for (u in units)
+            eliminated[u.owner] = false;
+        trace(eliminated);
+        var survivors = 0;
+        var last_survivor = 0;
+        for (p => e in eliminated)
             if (!e) {
-                surviving_player = p;
-                surviving_players++;
+                survivors ++;
+                last_survivor = p;
             }
-        }
 		if (eliminated[humanPlayer])
 			messageManager.sendMessage(new HumanDefeatMessage(humanPlayer));
-        if (surviving_players > 1) return;
+		if (survivors > 1) return;
         // otherwise only one is left
-        if (surviving_player == humanPlayer)
-			messageManager.sendMessage(new HumanVictoryMessage(surviving_player));
+		if (last_survivor == humanPlayer)
+			messageManager.sendMessage(new HumanVictoryMessage(last_survivor));
         else
-            messageManager.sendMessage(new AIVictoryMessage(surviving_player));
+			messageManager.sendMessage(new AIVictoryMessage(last_survivor));
         gameOver = true;
     }
 }

@@ -26,6 +26,7 @@ class CostIndicator extends Object {
         for (u in gameScene.gameState.units)
             if (u.type == Knight && u.home.equals(h)) {
                 knight_hex = u.position;
+                gameScene.unitToUnitSprites[u].highlight = highlight;
                 break;
             }
 		highlight.x = knight_hex.toPixel().x;
