@@ -19,7 +19,7 @@ class MainMenu extends Scene {
         var i = Std.random(7);
         var left = new Bitmap(left_tile, this);
         left.x = width/2;
-        left.y = height/4;
+        left.y = height/5;
         left.color = COLOURS[i];
 
 		var right_tile = hxd.Res.img.MenuKnightRight.toTile();
@@ -29,7 +29,7 @@ class MainMenu extends Scene {
 			j = Std.random(7);
 		var right = new Bitmap(right_tile, this);
 		right.x = width / 2;
-		right.y = height / 4;
+		right.y = height / 5;
 		right.color = COLOURS[j];
         
         // title

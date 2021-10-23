@@ -78,6 +78,14 @@ class BuyTownMessage extends Message {
 		name = "BuyTownMessage";
 	}
 }
+class AIBuyTownMessage extends Message {
+	public var hex:Hex;
+	public var player:Int;
+	public function new(h:Hex, p:Int) {
+		hex = h; player=p;
+		name = "AIBuyTownMessage";
+	}
+}
 
 class AIMoveMessage extends Message {
 	public var fromHex:Hex;

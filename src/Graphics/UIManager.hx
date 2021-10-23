@@ -50,6 +50,7 @@ class UIManager implements MessageListener {
                 }
                 unit = gameState.hexToUnits(hex).town;
 				if (unit != null && unit.owner != currentPlayer && gameState.canBuy(currentPlayer, unit.owner, hex) && currentPlayer == gameState.humanPlayer) {
+					animateTownBuy(hex, currentPlayer);
 					messageManager.sendMessage(new BuyTownMessage(hex, currentPlayer));
 					return true;
 				}
@@ -92,6 +93,14 @@ class UIManager implements MessageListener {
 			animateUnitMovement(fromHex, toHex, is_attack);
             messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
             return true;
+        }
+		if (Std.isOfType(msg, AIBuyTownMessage)) {
+			var hex = cast(msg, AIBuyTownMessage).hex;
+			var player = cast(msg, AIBuyTownMessage).player;
+			animateTownBuy(hex, player);
+			messageManager.sendMessage(new BuyTownMessage(hex, player));
+			return true;
+
         }
 		if (Std.isOfType(msg, HumanVictoryMessage)) {
 			var p = cast(msg, HumanVictoryMessage).player;
@@ -192,4 +201,8 @@ class UIManager implements MessageListener {
 	function get_currentPlayer():Int {
 		return gameState.currentPlayer;
 	}
+
+	function animateTownBuy(hex:Hex, player:Int) {
+        new CrownDescendingSprite(hex, player, gameScene);
+    }
 }

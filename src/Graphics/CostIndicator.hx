@@ -1,3 +1,4 @@
+import h2d.Bitmap;
 import TweenManager;
 import h2d.Object;
 import Constants;
@@ -18,6 +19,20 @@ class CostIndicator extends Object {
         if (can_buy)
 		    cost.color = COLOURS[gameScene.gameState.currentPlayer];
 
+		var highlightTile = hxd.Res.img.KnightHighlight.toTile();
+		highlightTile.setCenterRatio();
+		var highlight = new Bitmap(highlightTile);
+        var knight_hex = new Hex(0,0,0);
+        for (u in gameScene.gameState.units)
+            if (u.type == Knight && u.home.equals(h)) {
+                knight_hex = u.position;
+                break;
+            }
+		highlight.x = knight_hex.toPixel().x;
+		highlight.y = knight_hex.toPixel().y;
+		gameScene.add(highlight, 3);
+
         tweenManager.add(new FadeOutTween(this, 0, 2));
+        tweenManager.add(new FadeOutTween(highlight, 0, 2));
     }
 }

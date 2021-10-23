@@ -66,7 +66,6 @@ class GUI implements MessageListener {
 		rightText = new h2d.Text(hxd.res.DefaultFont.get(), right);
 		rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
 		rightText.textAlign = Center;
-		// rightText.x = -0.5;
 		rightText.y = -9;
 
 		var landTile = hxd.Res.img.Hex.toTile();
@@ -78,7 +77,6 @@ class GUI implements MessageListener {
 		landText = new h2d.Text(hxd.res.DefaultFont.get(), land);
 		landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
         landText.textAlign = Center;
-        // landText.x = -0.5;
 		landText.y = -9;
 
 		messageManager.addListener(this);

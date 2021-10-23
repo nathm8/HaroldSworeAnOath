@@ -78,7 +78,7 @@ class AI {
             var cost = gs.land[town.owner];
 			if (cost > dr) continue;
             if (gs.canBuy(gs.currentPlayer, town.owner, town.position, dr)) {
-                moves.push(new BuyTownMessage(town.position, gs.currentPlayer));
+				moves.push(new AIBuyTownMessage(town.position, gs.currentPlayer));
                 gs.buyTown(town.position, gs.currentPlayer, true);
                 dr -= 2 * cost;
             }

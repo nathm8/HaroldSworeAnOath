@@ -13,11 +13,6 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
-- resign button
-- gameover sequence
-    - win
-    - lose
-
 
 ------------------------------------------------------
                         AI
@@ -29,14 +24,10 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
                        Juice
 ------------------------------------------------------   
 - when mousing over end turn highlight\jiggle unmoved knights
-- highlight which knight belongs to a castle with CostIndicator
-    - outline sprite?
 - some font colours a bit hard to read on CostIndicator
     - bg sprite?
 - GUI
     - tween up\down the numbers
-    - have crowns shoot at purchased town from GUI
-    - have hexes shoot at DR symbol
 - have background not be flat black
     - slight tint to current player
 
