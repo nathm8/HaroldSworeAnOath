@@ -90,14 +90,16 @@ class UIManager implements MessageListener {
 			var fromHex = cast(msg, AIMoveMessage).fromHex;
 			var toHex = cast(msg, AIMoveMessage).toHex;
 			var is_attack = gameState.canAttack(fromHex, toHex);
-			animateUnitMovement(fromHex, toHex, is_attack);
+			if (gameState.canMove(fromHex, toHex))
+				animateUnitMovement(fromHex, toHex, is_attack);
             messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
             return true;
         }
 		if (Std.isOfType(msg, AIBuyTownMessage)) {
 			var hex = cast(msg, AIBuyTownMessage).hex;
 			var player = cast(msg, AIBuyTownMessage).player;
-			animateTownBuy(hex, player);
+			if (gameState.canBuy(player, gameState.hexToUnits(hex).town.owner, hex))
+				animateTownBuy(hex, player);
 			messageManager.sendMessage(new BuyTownMessage(hex, player));
 			return true;
         }
