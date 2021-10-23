@@ -46,8 +46,8 @@ class GameState implements MessageListener {
 		var owner_id = r.random(7);
         for (h in world.placeTowns()) {
             eliminated[owner_id] = false;
-			var town = new Unit(UnitType.Town, owner_id, h);
-			var knight = new Unit(UnitType.Knight, owner_id, h, town);
+			var town = new Unit(UnitType.Town, owner_id, h, h);
+			var knight = new Unit(UnitType.Knight, owner_id, h, h);
             units.push(town);
             units.push(knight);
 			hexToUnits[h].knight = knight;
@@ -192,7 +192,7 @@ class GameState implements MessageListener {
 			unit.position = back;
             hexToUnits[back].knight = unit;
 			if (hexToUnits[back].town != null && hexToUnits[back].town.owner != unit.owner)
-                conquerTown(back, unit.owner, false, true);
+				conquerTown(back, unit.owner, silent, true);
 		}
 		var unit = hexToUnits[from].knight;
 		unit.position = to;
@@ -260,8 +260,9 @@ class GameState implements MessageListener {
     // whether player can buy a castle from another. hex to check 
     // if there's a foreign knight occupying the town, in which case disallow
 	public function canBuy(buyer:Int, buyee:Int, hex: Hex) : Bool {
+		trace("canBuy", divineRight[buyer] >= 2 * land[buyee], (hexToUnits[hex].knight == null || hexToUnits[hex].knight.home.equals(hex)));
 		return divineRight[buyer] >= 2 * land[buyee]
-			&& (hexToUnits[hex].knight == null || hexToUnits[hex].knight.home == hexToUnits[hex].town);
+			&& (hexToUnits[hex].knight == null || hexToUnits[hex].knight.home.equals(hex));
 	}
 
 	function buyTown(hex:Hex, buyer:Int, silent=false) {
@@ -277,10 +278,12 @@ class GameState implements MessageListener {
 		var previous_owner = town.owner;
 		town.owner = buyer;
 		for (u in units)
-			if (u.home == town) {
+			if (u.type == Knight && u.home.equals(hex)) {
                 u.owner = buyer;
-                // move newly converted knight into their current position, in case they are garrisoning a castle
-                moveKnight(u.position, u.position);
+                u.canMove = false;
+                // check if newly converted knight is in a castle, if so conquer it
+				if (hexToUnits[hex].town != null && hexToUnits[hex].town.owner != buyer)
+					conquerTown(hexToUnits[hex].town.position, buyer, silent, true);
                 if (!silent)
 				    messageManager.sendMessage(new UpdateKnightColourMessage(u));
 				break;
@@ -295,7 +298,7 @@ class GameState implements MessageListener {
         eliminated[previous_owner] = player_eliminated;
 
         updateIncome();
-		if (!silent || skipRecalc)
+		if (!silent && !skipRecalc)
             messageManager.sendMessage(new RecalculateTerritoriesMessage());
     }
 }

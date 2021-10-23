@@ -41,11 +41,12 @@ UIManager.hx:147 Uncaught TypeError: Cannot read properties of null (reading '__
 
 
 knocking an enemy into a castle they don't own doesn't recolour the castle's knight 
+
+- costindicator is behind knight sprite
 ------------------------------------------------------
                    Balance\Gameplay
 ------------------------------------------------------
 - moar seeds lol
-- buying towns with foreign occupants? should be disallowed
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------

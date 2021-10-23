@@ -50,9 +50,8 @@ class AI {
                     }
                 }
                 if (no_move) continue;
-				var m = new AIMoveMessage(u.position, n);
+				moves.push(new AIMoveMessage(u.position, n));
                 gs.moveKnight(u.position, n, true);
-                moves.push(m);
             }
         }
         // create priority queue of (town, cost)
@@ -65,7 +64,7 @@ class AI {
 
         var biggest = new PriorityQueue<Unit>();
 		for (u in gs.units) {
-			if (u.type == Town && u.owner != gs.currentPlayer && gs.land[u.owner] < dr)
+			if (u.type == Town && u.owner != gs.currentPlayer && 2*gs.land[u.owner] <= dr)
 				biggest.push(u, gs.land[u.owner]);
         }
         while (biggest.size() > 0) {
@@ -74,8 +73,8 @@ class AI {
 			if (cost > dr) break;
 			dr -= 2 * cost;
             if (gs.canBuy(gs.currentPlayer, town.owner, town.position)) {
-                gs.buyTown(town.position, gs.currentPlayer, true);
                 moves.push(new BuyTownMessage(town.position, gs.currentPlayer));
+                gs.buyTown(town.position, gs.currentPlayer, true);
             }
         }
 
