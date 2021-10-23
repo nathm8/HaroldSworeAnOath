@@ -13,11 +13,11 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
 ------------------------------------------------------
                         Roadmap
 ------------------------------------------------------
-- main menu sequence
-    - rules text
+- resign button
 - gameover sequence
     - win
     - lose
+
 
 ------------------------------------------------------
                         AI
@@ -39,6 +39,8 @@ Win by gaining fealty from all Castles\nGain fealty by spending Divine Right or 
     - have hexes shoot at DR symbol
 - have background not be flat black
     - slight tint to current player
+
+- Easter Egg, click on MainMenu knight sides to change colours
 
 ------------------------------------------------------   
                       Project

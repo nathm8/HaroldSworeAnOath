@@ -6,7 +6,6 @@ final uiManager = UIManager.singleton;
 
 class Main extends hxd.App {
 
-	var gameState: GameState;
 	var gameScene: GameScene;
 
 	static function main() {
@@ -21,7 +20,8 @@ class Main extends hxd.App {
 		hxd.Window.getInstance().addEventTarget(onEvent);
 		
 		// gamelogic
-		newGame();
+		mainMenu();
+		// newGame();
 	}
 	
 	override function update(dt:Float) {
@@ -30,11 +30,15 @@ class Main extends hxd.App {
 		tweenManager.update(dt);
 	}
 	
+	function mainMenu() {
+		this.setScene2D(new MainMenu(this.newGame));
+	}
+
 	function newGame() {
 		tweenManager.reset();
 		messageManager.reset();
 		uiManager.reset();
-		gameState = new GameState();
+		var gameState = new GameState();
 		gameScene = new GameScene(gameState);
 		gameScene.newGame();
 		this.setScene2D(gameScene);
