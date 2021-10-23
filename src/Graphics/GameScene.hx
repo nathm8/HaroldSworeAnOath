@@ -81,7 +81,7 @@ class GameScene extends Scene implements MessageListener {
 			hexToHexSprites[h].capturedBy(territories[h].owner, territories[h].dist);
 		gameState.updateIncome();
 		if (firstTurn) {
-			gameState.getIncome(0, firstTurn);
+			gameState.getIncome(gameState.currentPlayer);
 			messageManager.sendMessage(new UpdateEconomyGUIMessage());
 		}
 	}

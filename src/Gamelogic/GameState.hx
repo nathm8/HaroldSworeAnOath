@@ -17,7 +17,6 @@ class GameState implements MessageListener {
     public var hexes(get, never): Array<Hex>;
     public var pathfinder(get, never): Astar;
     public var units: Array<Unit>;
-    // public var hexToUnits: HashMap<Hex, {town:Unit, knight:Unit}>;
     public var currentPlayer: Int;
 	public var divineRight: Map<Int, Int>;
     public var land: Map<Int, Int>;
@@ -134,56 +133,81 @@ class GameState implements MessageListener {
         return res;
     }
 
-    public function canMove(from: Hex, to: Hex):Bool {
+    public function canMove(from: Hex, to: Hex, verbose=false):Bool {
         // has to be somewhere to move to\from
+		if (verbose)
+			trace("canMove: to or from hex invalid");
 		if (!(hexSet.exists(to) && hexSet.exists(from)))
             return false;
         var from_knight = hexToUnits(from).knight;
         var to_knight = hexToUnits(to).knight;
         // have to be something to move
+		if (verbose)
+			trace("canMove: no from knight");
 		if (from_knight == null)
             return false;
         // can't move if not our turn
+		if (verbose)
+			trace("canMove: from knight not owned by current player");
         if (from_knight.owner != currentPlayer)
             return false;
         // have not yet moved this turn
+		if (verbose)
+			trace("canMove: from_knight already moved");
         if (!from_knight.canMove)
             return false;
         // can only move to neighbouring hexes, or back to start
         var in_range = from.equals(to);
         for (h in to.ring(1))
             in_range = in_range || from.equals(h);
+		if (verbose)
+			trace("canMove: not in range");
         if (!in_range)
             return false;
         // can attack if destination is occupied
+		if (verbose)
+			trace("canMove: to_knight, but cannot attack",to_knight != null && to_knight != from_knight && !canAttack(from, to, verbose));
 		if (to_knight != null && to_knight != from_knight && !canAttack(from, to))
             return false;
         return true;
     }
 
-	public function canAttack(from:Hex, to:Hex):Bool {
+	public function canAttack(from:Hex, to:Hex, verbose=false):Bool {
 		// has to be somewhere to attack to\from
+		if (verbose) trace("canAttack: to or from hex invalid");
 		if (!(hexSet.exists(to) && hexSet.exists(from)))
 			return false;
         // can't attack ourself
+		if (verbose)
+			trace("canAttack: cant attack in place");
 		if (from.equals(to))
 			return false;
 		var from_knight = hexToUnits(from).knight;
 		var to_knight = hexToUnits(to).knight;
         var to_town = hexToUnits(to).town;
         // can't attack without two knights
+		if (verbose)
+			trace("canAttack: no to or from knight");
 		if (from_knight == null || to_knight == null)
             return false;
 		// can't attack if not our turn
+		if (verbose)
+			trace("canAttack: not our turn");
 		if (from_knight.owner != currentPlayer)
             return false;
 		// can't attack our own knights
+		if (verbose)
+			trace("canAttack: can't attack out own knights");
 		if (from_knight.owner == to_knight.owner)
 			return false;
 		// can't attack knights in castles
+		if (verbose)
+			trace("canAttack: can't attack knight in castle");
 		if (to_town != null)
 			return false;
         // can't knock back knight if there's no space behind them
+		if (verbose)
+			trace("canAttack: no space for to knight to go back into");
 		var back = to.add(to.subtract(from));
         if (!hexSet.exists(back) || hexToUnits(back).knight != null)
             return false;
@@ -194,7 +218,10 @@ class GameState implements MessageListener {
 		if (Std.isOfType(msg, KnightMoveMessage)) {
             var from = cast(msg, KnightMoveMessage).fromHex;
 			var to = cast(msg, KnightMoveMessage).toHex;
-            moveKnight(from, to);
+            if (canMove(from, to))
+                moveKnight(from, to);
+            else
+                trace("ignoring moveKnight",from,to,"as it is illegal in this gamestate");
             return true;
         }
 		if (Std.isOfType(msg, EndTurnMessage)) {
@@ -204,7 +231,11 @@ class GameState implements MessageListener {
 		if (Std.isOfType(msg, BuyTownMessage)) {
 			var hex = cast(msg, BuyTownMessage).hex;
 			var player = cast(msg, BuyTownMessage).player;
-            buyTown(hex, player);
+			if (canBuy(player, hexToUnits(hex).town.owner, hex))
+                buyTown(hex, player);
+			else
+				trace("ignoring buyTown", hex, player, "as it is illegal in this gamestate");
+
             return true;
         }
         return false;
@@ -212,15 +243,16 @@ class GameState implements MessageListener {
 
     function moveKnight(from: Hex, to: Hex, silent=false) {
 		// if (!silent) trace("moveKnight", from, to);
+		// if (!silent && !canMove(from, to)) throw "error! moveKnight though not canMove!";
         if (from.equals(to)){
 			// if (!silent) trace("staying put");
             hexToUnits(from).knight.canMove = false;
 			return;
         } 
 		if (canAttack(from, to)) {
-			// if (!silent) trace("attacking");
-			var unit = hexToUnits(to).knight;
+            var unit = hexToUnits(to).knight;
 			var back = to.add(to.subtract(from));
+			// if (!silent) trace("attacking, knocked back to", back);
 			unit.position = back;
 			if (hexToUnits(back).town != null && hexToUnits(back).town.owner != unit.owner) {
 				// if (!silent) trace("knockback capture");
@@ -248,11 +280,9 @@ class GameState implements MessageListener {
         return territories;
 	}
     
-    public function getIncome(player:Int, firstTurn=false) {
+    public function getIncome(player:Int) {
         for (p => l in land) {
-            if (firstTurn)
-                divineRight[p] += l;
-            else if (p == player)
+            if (p == player)
                 divineRight[p] += l;
         }
     }
@@ -266,9 +296,8 @@ class GameState implements MessageListener {
 	function endTurn() {
         if (gameOver) return;
         // trace("endTurn", currentPlayer);
-        getIncome(currentPlayer);
 		for (u in units) {
-			if (u.owner != currentPlayer) continue;
+            if (u.owner != currentPlayer) continue;
             if (u.type == Knight) {
                 u.canMove = true;
 				messageManager.sendMessage(new StandUpMessage(u));
@@ -277,6 +306,8 @@ class GameState implements MessageListener {
         currentPlayer = (currentPlayer+1)%7;
 		while (eliminated[currentPlayer])
             currentPlayer = (currentPlayer+1)%7;
+		messageManager.sendMessage(new UpdateEconomyGUIMessage(true));
+        getIncome(currentPlayer);
 		messageManager.sendMessage(new UpdateEconomyGUIMessage());
         if (currentPlayer == humanPlayer) return;
         // AI
@@ -293,9 +324,10 @@ class GameState implements MessageListener {
 
     // whether player can buy a castle from another. hex to check 
     // if there's a foreign knight occupying the town, in which case disallow
-	public function canBuy(buyer:Int, buyee:Int, hex: Hex, dr: Int=null) : Bool {
-		// trace("canBuy", divineRight[buyer] >= 2 * land[buyee], (hexToUnits(hex].knight == null || hexToUnits[hex).knight.home.equals(hex)));
-		if (dr == null) dr = divineRight[buyer];
+	public function canBuy(buyer:Int, buyee:Int, hex: Hex) : Bool {
+		// trace("canBuy", buyer, buyee, hex, divineRight[buyer] >= 2 * land[buyee], divineRight[buyer], 2 * land[buyee], hexToUnits(hex).knight == null);
+		// if (hexToUnits(hex).knight != null)
+		// 	trace("can buy", hexToUnits(hex).knight.home, hexToUnits(hex).knight.home.equals(hex), hexToUnits(hex).knight);
 		return divineRight[buyer] >= 2 * land[buyee]
 			&& (hexToUnits(hex).town.owner == buyee)
 			&& (buyer != buyee)
@@ -305,15 +337,15 @@ class GameState implements MessageListener {
 	function buyTown(hex:Hex, buyer:Int, silent=false) {
         // if (!silent) trace("buy town", hex, buyer);
         var town = hexToUnits(hex).town;
-        var cost = land[town.owner];
-        divineRight[buyer] -= 2*cost;
+        if (!canBuy(buyer, town.owner, hex)) throw "town bought though not canBuy!";
+        var cost = 2*land[town.owner];
+        divineRight[buyer] -= cost;
 		conquerTown(hex, buyer, silent);
     }
     
 	function conquerTown(hex:Hex, buyer:Int, silent=false, skipRecalc=false) {
 		// if (!silent) trace("conquer town", hex, buyer);
 		var town = hexToUnits(hex).town;
-		var previous_owner = town.owner;
 		town.owner = buyer;
 		for (u in units)
 			if (u.type == Knight && u.home.equals(hex)) {
@@ -341,7 +373,7 @@ class GameState implements MessageListener {
             eliminated[p] = true;
 		for (u in units)
             eliminated[u.owner] = false;
-        trace(eliminated);
+        // trace(eliminated);
         var survivors = 0;
         var last_survivor = 0;
         for (p => e in eliminated)

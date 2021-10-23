@@ -3,6 +3,7 @@ import MessageManager;
 class AI {
 
     public static function aiTurn(gs: GameState) {
+        // trace("AI turn start", gs.currentPlayer);
         var moves = new Array<Message>();
         for (u in gs.units) {
 			if (u.owner != gs.currentPlayer) continue;
@@ -61,26 +62,19 @@ class AI {
             }
         }
         // create priority queue of (town, cost)
-        // go through all buy all the towns we can, most expensive first
-        // then do another round of troop movement
-        var player_land = new Array<{land:Int, player:Int}>();
-		for (p => l in gs.land) player_land.push({land:l, player:p});
-        player_land.sort((a,b) -> a.land-b.land );
-        var dr = gs.divineRight[gs.currentPlayer];
-
+        // go through and buy all the towns we can, most expensive first
         var biggest = new PriorityQueue<Unit>();
 		for (u in gs.units) {
-			if (u.type == Town && gs.canBuy(gs.currentPlayer, u.owner, u.position, dr))
-				biggest.push(u, gs.land[u.owner]);
+			if (u.type == Town && gs.canBuy(gs.currentPlayer, u.owner, u.position))
+				biggest.push(u, 2*gs.land[u.owner]);
         }
         while (biggest.size() > 0) {
             var town = biggest.pop();
-            var cost = gs.land[town.owner];
-			if (cost > dr) continue;
-            if (gs.canBuy(gs.currentPlayer, town.owner, town.position, dr)) {
+            var cost = 2.5*gs.land[town.owner]+5; // we don't recalc land after moving knights, so have some slack
+			if (cost > gs.divineRight[gs.currentPlayer]) continue;
+			if (gs.canBuy(gs.currentPlayer, town.owner, town.position)) {
 				moves.push(new AIBuyTownMessage(town.position, gs.currentPlayer));
                 gs.buyTown(town.position, gs.currentPlayer, true);
-                dr -= 2 * cost;
             }
         }
 

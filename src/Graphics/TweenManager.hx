@@ -1,3 +1,4 @@
+import h2d.Text;
 import h2d.Object;
 import js.html.DragEvent;
 import hxd.Rand;
@@ -219,6 +220,27 @@ class FadeOutTween extends Tween {
 			obj.remove();
 	}
 }
+
+class TextTween extends Tween {
+	var text:Text;
+	var from: Int;
+	var to: Int;
+
+	public function new(tex:Text, f: Int, t: Int, te:Float, tt:Float) {
+		super(te, tt);
+		text = tex;
+		to = t;
+		from = f;
+	}
+
+	override function update(dt:Float) {
+		super.update(dt);
+		var t = timeElapsed / timeTotal;
+		text.text = Std.string(Math.round(to*t + from*(1-t)));
+	}
+}
+
+
 
 class DelayedCallTween extends Tween {
     var func: ()->Void;

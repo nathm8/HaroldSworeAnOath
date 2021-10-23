@@ -1,3 +1,5 @@
+import MessageManager.EndTurnMessage;
+import UnitSprite.messageManager;
 import Constants;
 
 final tweenManager = TweenManager.singleton;
@@ -50,7 +52,9 @@ class Main extends hxd.App {
 				switch (event.keyCode) {
 					case hxd.Key.R:
 						newGame();
-					case _:
+					case hxd.Key.ENTER:
+						if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
+							messageManager.sendMessage(new EndTurnMessage());
 				}
 			case _:
 		}

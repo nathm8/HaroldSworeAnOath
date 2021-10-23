@@ -100,7 +100,6 @@ class UIManager implements MessageListener {
 			animateTownBuy(hex, player);
 			messageManager.sendMessage(new BuyTownMessage(hex, player));
 			return true;
-
         }
 		if (Std.isOfType(msg, HumanVictoryMessage)) {
 			var p = cast(msg, HumanVictoryMessage).player;
@@ -122,7 +121,6 @@ class UIManager implements MessageListener {
 		}
         return false;
 	}
-
 
 	public function initialiseWithGameScene(value:GameScene):GameScene {
 		gameScene = value;

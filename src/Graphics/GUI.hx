@@ -1,3 +1,5 @@
+import TweenManager;
+import GameScene.tweenManager;
 import h2d.col.Point;
 import h2d.col.Polygon;
 import h2d.col.Polygons;
@@ -87,8 +89,14 @@ class GUI implements MessageListener {
 			backgroundButton.color = COLOURS[gameScene.gameState.currentPlayer];
 			right.color = COLOURS[gameScene.gameState.currentPlayer];
 			land.color = COLOURS[gameScene.gameState.currentPlayer];
-			landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
-			rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
+			if (cast(msg, UpdateEconomyGUIMessage).instant) {
+				landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
+				rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
+			} else {
+				tweenManager.add(new TextTween(landText, Std.parseInt(landText.text), gameScene.gameState.land[gameScene.gameState.currentPlayer], 0, 0.75));
+				tweenManager.add(new TextTween(rightText, Std.parseInt(rightText.text), gameScene.gameState.divineRight[gameScene.gameState.currentPlayer], 0, 0.75));
+			}
+
 			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
 				buttonText.text = "End Turn";
 			else

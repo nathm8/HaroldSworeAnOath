@@ -43,7 +43,9 @@ class RecalculateTerritoriesMessage extends Message {
 }
 
 class UpdateEconomyGUIMessage extends Message {
-	public function new() {
+	public var instant: Bool;
+	public function new(i = false) {
+		instant = i;
 		name = "UpdateEconomyGUIMessage";
 	}
 }
@@ -51,6 +53,18 @@ class UpdateEconomyGUIMessage extends Message {
 class EndTurnMessage extends Message {
 	public function new() {
 		name = "EndTurnMessage";
+	}
+}
+
+class AIEndTurnMessage extends Message {
+	public function new() {
+		name = "AIEndTurnMessage";
+	}
+}
+
+class HumanEndTurnMessage extends Message {
+	public function new() {
+		name = "HumanEndTurnMessage";
 	}
 }
 
