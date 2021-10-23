@@ -35,7 +35,7 @@ class MainMenu extends Scene {
         // title
 		var titleText = new h2d.Text(hxd.res.DefaultFont.get(), this);
 		titleText.x = width / 2;
-		titleText.y = height / 3 + 25;
+		titleText.y = height / 3 + 75;
 		titleText.text = "Harold Swore An Oath";
 		titleText.textAlign = Center;
 		titleText.setScale(5);
@@ -45,7 +45,7 @@ class MainMenu extends Scene {
 		rulesTile.setCenterRatio();
 		var rules = new Bitmap(rulesTile, this);
 		rules.x = width / 2;
-		rules.y = height / 4;
+		rules.y = height / 4 + 100;
 		rules.visible = false;
 		rules.color = COLOURS[i];
 
@@ -54,7 +54,7 @@ class MainMenu extends Scene {
 		playButtonTile.setCenterRatio();
 		var playButton = new Bitmap(playButtonTile, this);
 		playButton.x = width / 2;
-		playButton.y = height / 3 + 200;
+		playButton.y = height / 3 + 250;
         playButton.scale(2);
 		playButton.color = COLOURS[i];
 		var playButtonText = new h2d.Text(hxd.res.DefaultFont.get(), playButton);
@@ -68,7 +68,7 @@ class MainMenu extends Scene {
 		howButtonTile.setCenterRatio();
 		var howButton = new Bitmap(howButtonTile, this);
 		howButton.x = width / 2;
-		howButton.y = height / 3 + 350;
+		howButton.y = height / 3 + 400;
 		howButton.scale(2);
 		howButton.color = COLOURS[j];
 		var howButtonText = new h2d.Text(hxd.res.DefaultFont.get(), howButton);
