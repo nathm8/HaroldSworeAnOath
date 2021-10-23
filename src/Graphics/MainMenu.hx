@@ -36,7 +36,7 @@ class MainMenu extends Scene {
 		var titleText = new h2d.Text(hxd.res.DefaultFont.get(), this);
 		titleText.x = width / 2;
 		titleText.y = height / 3 + 25;
-		titleText.text = "Harold Swore an Oath";
+		titleText.text = "Harold Swore An Oath";
 		titleText.textAlign = Center;
 		titleText.setScale(5);
 

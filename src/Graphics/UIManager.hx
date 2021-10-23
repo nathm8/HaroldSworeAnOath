@@ -1,3 +1,5 @@
+import GUI.names;
+import h2d.Text;
 import Constants;
 import TweenManager;
 import h2d.Bitmap;
@@ -18,6 +20,8 @@ class UIManager implements MessageListener {
     var currentPlayer(get, never): Int;
     
     // top row UI
+    var notificationText: Text;
+    // bot row UI
     var gui: GUI;
 
 	private function new() {
@@ -89,6 +93,24 @@ class UIManager implements MessageListener {
             messageManager.sendMessage(new KnightMoveMessage(fromHex, toHex));
             return true;
         }
+		if (Std.isOfType(msg, HumanVictoryMessage)) {
+			var p = cast(msg, HumanVictoryMessage).player;
+			notificationText.text = "You are Victorious!\n(press r to play again)";
+			notificationText.color = COLOURS[p];
+			return true;
+		}
+		if (Std.isOfType(msg, HumanDefeatMessage)) {
+			var p = cast(msg, HumanDefeatMessage).player;
+			notificationText.text = "You have been Defeated!\n(press r to play again)";
+			notificationText.color = COLOURS[p];
+			return true;
+		}
+		if (Std.isOfType(msg, AIVictoryMessage)) {
+			var p = cast(msg, AIVictoryMessage).player;
+			notificationText.text = names[p] + " is Victorious\n(press r to play again)";
+			notificationText.color = COLOURS[p];
+			return true;
+		}
         return false;
 	}
 
@@ -111,6 +133,13 @@ class UIManager implements MessageListener {
             movementHexes.push(mh);
         }
         gui = new GUI(gameScene);
+
+		notificationText = new h2d.Text(hxd.res.DefaultFont.get());
+        gameScene.add(notificationText, 100);
+		notificationText.x = 500;
+		notificationText.y = 275;
+		notificationText.text = "";
+		notificationText.textAlign = Center;
 
 		return gameScene;
 	}

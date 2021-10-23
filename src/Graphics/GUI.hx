@@ -37,7 +37,7 @@ class GUI implements MessageListener {
 		backgroundButtonTile.setCenterRatio();
 		backgroundButton = new Bitmap(backgroundButtonTile, gameScene);
 		backgroundButton.x = 500;
-		backgroundButton.y = 750;
+		backgroundButton.y = 700;
 		backgroundButton.color = COLOURS[gameScene.gameState.currentPlayer];
 		buttonText = new h2d.Text(hxd.res.DefaultFont.get(), backgroundButton);
 		buttonText.y = -10;
@@ -60,8 +60,8 @@ class GUI implements MessageListener {
 		var rightTile = hxd.Res.img.Right.toTile();
 		rightTile.setCenterRatio();
 		right = new Bitmap(rightTile, gameScene);
-		right.x = 400;
-		right.y = 750;
+		right.x = 425;
+		right.y = 700;
 		right.color = COLOURS[gameScene.gameState.currentPlayer];
 		rightText = new h2d.Text(hxd.res.DefaultFont.get(), right);
 		rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);
@@ -72,8 +72,8 @@ class GUI implements MessageListener {
 		var landTile = hxd.Res.img.Hex.toTile();
 		landTile.setCenterRatio();
 		land = new Bitmap(landTile, gameScene);
-		land.x = 600;
-		land.y = 750;
+		land.x = 575;
+		land.y = 700;
 		land.color = COLOURS[gameScene.gameState.currentPlayer];
 		landText = new h2d.Text(hxd.res.DefaultFont.get(), land);
 		landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);

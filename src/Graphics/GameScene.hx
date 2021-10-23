@@ -1,3 +1,4 @@
+import GUI.names;
 import UIManager.messageManager;
 import MessageManager;
 import haxe.ds.HashMap;

@@ -24,6 +24,7 @@ class GameState implements MessageListener {
     public var eliminated: Map<Int, Bool>;
 	var territories:HashMap<Hex, {owner: Int, dist: Int}>;
     public var humanPlayer: Int;
+    var gameOver = false;
 
     public function new(generate=true) {
         if (!generate) return;
@@ -246,6 +247,7 @@ class GameState implements MessageListener {
     }
 
 	function endTurn() {
+        if (gameOver) return;
         // trace("endTurn", currentPlayer);
         getIncome(currentPlayer);
 		for (u in units) {
@@ -270,12 +272,14 @@ class GameState implements MessageListener {
 			if (i == moves.length - 2 || moves.length == 1)
 			    delay += 1.0;
 		}
+		endGameCheck();
     }
 
     // whether player can buy a castle from another. hex to check 
     // if there's a foreign knight occupying the town, in which case disallow
-	public function canBuy(buyer:Int, buyee:Int, hex: Hex) : Bool {
+	public function canBuy(buyer:Int, buyee:Int, hex: Hex, dr: Int=null) : Bool {
 		// trace("canBuy", divineRight[buyer] >= 2 * land[buyee], (hexToUnits(hex].knight == null || hexToUnits[hex).knight.home.equals(hex)));
+		if (dr == null) dr = divineRight[buyer];
 		return divineRight[buyer] >= 2 * land[buyee]
 			&& (hexToUnits(hex).town.owner == buyee)
 			&& (buyer != buyee)
@@ -322,5 +326,25 @@ class GameState implements MessageListener {
 		if (!silent && !skipRecalc)
             messageManager.sendMessage(new RecalculateTerritoriesMessage());
     }
+    
 
+	function endGameCheck() {
+        var surviving_player = 0;
+        var surviving_players = 0;
+        for (p => e in eliminated) {
+            if (!e) {
+                surviving_player = p;
+                surviving_players++;
+            }
+        }
+		if (eliminated[humanPlayer])
+			messageManager.sendMessage(new HumanDefeatMessage(humanPlayer));
+        if (surviving_players > 1) return;
+        // otherwise only one is left
+        if (surviving_player == humanPlayer)
+			messageManager.sendMessage(new HumanVictoryMessage(surviving_player));
+        else
+            messageManager.sendMessage(new AIVictoryMessage(surviving_player));
+        gameOver = true;
+    }
 }

@@ -90,6 +90,33 @@ class AIMoveMessage extends Message {
 	}
 }
 
+class AIVictoryMessage extends Message {
+	public var player:Int;
+
+	public function new(p: Int) {
+		name = "AIVictoryMessage";
+		player = p;
+	}
+}
+
+class HumanVictoryMessage extends Message {
+	public var player:Int;
+
+	public function new(p: Int) {
+		name = "HumanVictoryMessage";
+		player = p;
+	}
+}
+
+class HumanDefeatMessage extends Message {
+	public var player:Int;
+
+	public function new(p: Int) {
+		name = "HumanDefeatMessage";
+		player = p;
+	}
+}
+
 interface MessageListener {
     public function receiveMessage(msg: Message): Bool;
 }

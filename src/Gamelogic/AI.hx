@@ -70,14 +70,14 @@ class AI {
 
         var biggest = new PriorityQueue<Unit>();
 		for (u in gs.units) {
-			if (u.type == Town && u.owner != gs.currentPlayer && 2*gs.land[u.owner] <= dr)
+			if (u.type == Town && gs.canBuy(gs.currentPlayer, u.owner, u.position, dr))
 				biggest.push(u, gs.land[u.owner]);
         }
         while (biggest.size() > 0) {
             var town = biggest.pop();
             var cost = gs.land[town.owner];
 			if (cost > dr) continue;
-            if (gs.canBuy(gs.currentPlayer, town.owner, town.position)) {
+            if (gs.canBuy(gs.currentPlayer, town.owner, town.position, dr)) {
                 moves.push(new BuyTownMessage(town.position, gs.currentPlayer));
                 gs.buyTown(town.position, gs.currentPlayer, true);
                 dr -= 2 * cost;
