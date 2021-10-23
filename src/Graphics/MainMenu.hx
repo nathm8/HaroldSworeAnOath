@@ -97,5 +97,40 @@ class MainMenu extends Scene {
 			rules.visible = !rules.visible;
 			playButton.visible = !playButton.visible;
 		};
+
+		var right_polys:Polygons = new Polygons();
+		right_polys.push(new Polygon([
+			new Point(0, -140),
+			new Point(120, -140),
+			new Point(120, 140),
+			new Point(0, 140)
+		]));
+
+		var left_polys:Polygons = new Polygons();
+		left_polys.push(new Polygon([
+			new Point(0, 140),
+			new Point(-120, 140),
+			new Point(-120, -140),
+			new Point(0, -140)
+		]));
+
+		var rightInteraction = new h2d.Interactive(0, 0, right, new PolygonCollider(right_polys, true));
+		rightInteraction.onClick = function(event:Event) {
+			var old_j = j;
+			while (j == old_j || i == j)
+				j = Std.random(7);		
+			right.color = COLOURS[j];
+			howButton.color = COLOURS[j];
+		};
+		
+		var leftInteraction = new h2d.Interactive(0, 0, left, new PolygonCollider(left_polys, true));
+		leftInteraction.onClick = function(event:Event) {
+			var old_i = i;
+			while (i == old_i || i == j)
+				i = Std.random(7);
+			left.color = COLOURS[i];
+			playButton.color = COLOURS[i];
+			rules.color = COLOURS[i];
+		};
     }
 }
