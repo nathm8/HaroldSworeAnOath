@@ -62,6 +62,18 @@ class AIEndTurnMessage extends Message {
 	}
 }
 
+class RestartMessage extends Message {
+	public function new() {
+		name = "RestartMessage";
+	}
+}
+
+class MainMenuMessage extends Message {
+	public function new() {
+		name = "MainMenuMessage";
+	}
+}
+
 class HumanEndTurnMessage extends Message {
 	public function new() {
 		name = "HumanEndTurnMessage";

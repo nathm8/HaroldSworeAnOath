@@ -33,8 +33,12 @@ class GUI implements MessageListener {
 	var right: Bitmap;
 	var land: Bitmap;
 
+	var restartButton: Bitmap;
+	var mainMenuButton: Bitmap;
+
     public function new(gs: GameScene) {
         gameScene = gs;
+		// bottom button
 		var backgroundButtonTile = hxd.Res.img.ButtonBG.toTile();
 		backgroundButtonTile.setCenterRatio();
 		backgroundButton = new Bitmap(backgroundButtonTile, gameScene);
@@ -57,6 +61,34 @@ class GUI implements MessageListener {
 		interaction.onClick = function(event:Event) {
 			if (gameScene.gameState.currentPlayer == gameScene.gameState.humanPlayer)
 				messageManager.sendMessage(new EndTurnMessage());
+		};
+
+		// topright button
+		restartButton = new Bitmap(backgroundButtonTile, gameScene);
+		restartButton.x = 675;
+		restartButton.y = 275;
+		restartButton.color = COLOURS[gameScene.gameState.currentPlayer];
+		var restartText = new h2d.Text(hxd.res.DefaultFont.get(), restartButton);
+		restartText.y = -10;
+		restartText.text = "Restart";
+		restartText.textAlign = Center;
+		var restartInteraction = new h2d.Interactive(0, 0, restartButton, new PolygonCollider(polys, true));
+		restartInteraction.onClick = function(event:Event) {
+			messageManager.sendMessage(new RestartMessage());
+		};
+
+		// topleft
+		mainMenuButton = new Bitmap(backgroundButtonTile, gameScene);
+		mainMenuButton.x = 325;
+		mainMenuButton.y = 275;
+		mainMenuButton.color = COLOURS[gameScene.gameState.currentPlayer];
+		var mainMenuText = new h2d.Text(hxd.res.DefaultFont.get(), mainMenuButton);
+		mainMenuText.y = -10;
+		mainMenuText.text = "Main Menu";
+		mainMenuText.textAlign = Center;
+		var mainMenuInteraction = new h2d.Interactive(0, 0, mainMenuButton, new PolygonCollider(polys, true));
+		mainMenuInteraction.onClick = function(event:Event) {
+			messageManager.sendMessage(new MainMenuMessage());
 		};
 
 		var rightTile = hxd.Res.img.Right.toTile();
@@ -89,6 +121,8 @@ class GUI implements MessageListener {
 			backgroundButton.color = COLOURS[gameScene.gameState.currentPlayer];
 			right.color = COLOURS[gameScene.gameState.currentPlayer];
 			land.color = COLOURS[gameScene.gameState.currentPlayer];
+			restartButton.color = COLOURS[gameScene.gameState.currentPlayer];
+			mainMenuButton.color = COLOURS[gameScene.gameState.currentPlayer];
 			if (cast(msg, UpdateEconomyGUIMessage).instant) {
 				landText.text = Std.string(gameScene.gameState.land[gameScene.gameState.currentPlayer]);
 				rightText.text = Std.string(gameScene.gameState.divineRight[gameScene.gameState.currentPlayer]);

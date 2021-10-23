@@ -1,12 +1,13 @@
+import MessageManager;
+import MessageManager.Message;
+import MessageManager.MessageListener;
 import MessageManager.EndTurnMessage;
-import UnitSprite.messageManager;
-import Constants;
 
 final tweenManager = TweenManager.singleton;
 final messageManager = MessageManager.singleton;
 final uiManager = UIManager.singleton;
 
-class Main extends hxd.App {
+class Main extends hxd.App implements MessageListener {
 
 	var gameScene: GameScene;
 
@@ -44,6 +45,7 @@ class Main extends hxd.App {
 		gameScene = new GameScene(gameState);
 		gameScene.newGame();
 		this.setScene2D(gameScene);
+		messageManager.addListener(this);
 	}
 
 	function onEvent(event:hxd.Event) {
@@ -60,4 +62,16 @@ class Main extends hxd.App {
 		}
 	}
 
+
+	public function receiveMessage(msg:Message):Bool {
+		if (Std.isOfType(msg, RestartMessage)) {
+			newGame();
+			return true;
+		}
+		if (Std.isOfType(msg, MainMenuMessage)) {
+			mainMenu();
+			return true;
+		}
+		return false;
+	}
 }
